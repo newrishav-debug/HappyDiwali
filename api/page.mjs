@@ -8,7 +8,7 @@ export async function GET(req) {
   let html = await (await fetch(new URL('/index.html', url))).text();
   if (name) {
     const safe = esc(name);
-    html = setMeta(html, 'og:title', `Happy Diwali from ${safe}`);
+    html = setMeta(html, 'og:title', `Happy Diwali from ${safe} · Tap to Play`);
     html = setMeta(html, 'og:url', `${url.origin}/from/${encodeURIComponent(name)}`);
     html = setMeta(html, 'og:image', `${url.origin}/api/preview?v=2&from=${encodeURIComponent(name)}`);
     html = html.replace(/<title>[^<]*<\/title>/, `<title>Happy Diwali from ${safe}!</title>`);
