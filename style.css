@@ -1,60 +1,109 @@
+@font-face { font-family: "Yatra One"; src: url(fonts/yatra-latin.woff2) format("woff2"); font-display: swap; }
+@font-face { font-family: "Galada"; src: url(fonts/galada-bengali.woff2) format("woff2"); font-display: swap; }
+@font-face { font-family: "Baloo Da 2"; src: url(fonts/balooda-latin.woff2) format("woff2"); font-weight: 400 800; font-display: swap; unicode-range: U+0000-00FF, U+2010-2027, U+2190-2193; }
+@font-face { font-family: "Baloo Da 2"; src: url(fonts/balooda-bengali.woff2) format("woff2"); font-weight: 400 800; font-display: swap; unicode-range: U+0951-0952, U+0964-0965, U+0980-09FE, U+200C-200D, U+25CC; }
+
+:root { --u: 1px; --title: "Yatra One"; --gold: #e8b23e; --pale: #ffe08a; --ivory: #fff4d6; --maroon: #5c0f2e; }
+:root:lang(bn) { --title: "Galada"; }
 * { box-sizing: border-box; margin: 0; }
 [hidden] { display: none !important; }
-html, body { height: 100%; overflow: hidden; }
+html, body { height: 100%; overflow: hidden; background: #17051f; }
 body {
-  background: linear-gradient(#0b0826, #24103f 70%, #4a1a3f);
-  color: #fff4d6;
-  font-family: system-ui, -apple-system, "Noto Sans Bengali", "Kohinoor Bangla", sans-serif;
-  -webkit-tap-highlight-color: transparent;
+  color: var(--ivory); font-family: "Baloo Da 2", system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;
   user-select: none; -webkit-user-select: none;
 }
-#sky { position: fixed; inset: 0; width: 100%; height: 100%; touch-action: none; }
 
-#hud {
-  position: fixed; top: max(10px, env(safe-area-inset-top)); left: 16px; right: 16px;
-  display: flex; justify-content: space-between; pointer-events: none;
+/* Sized and, on an upright phone, turned sideways by game.js, so everything inside is always landscape. */
+#stage { position: fixed; left: 0; top: 0; overflow: hidden; transform-origin: 0 0; }
+#bg { position: absolute; inset: 0; background: #2a0f5e url(art/scene.jpg) center bottom / cover no-repeat; }
+#bg::after { content: ""; position: absolute; inset: 0; background: #12062e; opacity: 0; transition: opacity .5s; }
+.playing #bg::after { opacity: .5; }
+#sky { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+#toran {
+  position: absolute; left: 0; right: 0; top: 0; height: calc(var(--u) * 58); pointer-events: none;
+  background: url(art/toran.svg) center top / auto 100% repeat-x;
+  filter: drop-shadow(0 3px 3px #0007);
 }
-#hud small, #result small { display: block; font-size: 13px; opacity: .8; }
-#hud b { font-size: 30px; font-variant-numeric: tabular-nums; line-height: 1.1; }
-#hud .right { text-align: right; }
-#hud .low b { color: #ff7a6b; }
+
+#hud { position: absolute; inset: 0; pointer-events: none; }
+.plaque {
+  position: absolute; top: calc(var(--u) * 8); min-width: calc(var(--u) * 96); padding: calc(var(--u) * 3) calc(var(--u) * 14) calc(var(--u) * 1);
+  text-align: center; background: linear-gradient(#7a1438, #470a22);
+  border: calc(var(--u) * 2) solid var(--gold); border-radius: calc(var(--u) * 26) calc(var(--u) * 26) calc(var(--u) * 10) calc(var(--u) * 10);
+  box-shadow: 0 0 0 calc(var(--u) * 1.5) #470a22, 0 calc(var(--u) * 3) calc(var(--u) * 8) #0009;
+}
+.plaque small { display: block; font-size: calc(var(--u) * 12); line-height: 1.1; font-weight: 600; color: var(--pale); }
+.plaque b { display: block; font: 400 calc(var(--u) * 28)/1.08 var(--title), serif; color: #fff; }
+#scoreBox { left: max(calc(var(--u) * 12), env(safe-area-inset-left)); }
+#timeBox { right: max(calc(var(--u) * 62), calc(env(safe-area-inset-right) + var(--u) * 52)); }
+#timeBox.low { background: linear-gradient(#d4231f, #7d0e0b); }
 
 #mute {
-  position: fixed; top: max(10px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); white-space: nowrap; min-height: 44px; padding: 0 14px;
-  font: inherit; font-size: 14px; color: #fff4d6; background: #0b0826cc; border: 1px solid #ffd27a66; border-radius: 22px;
+  position: absolute; top: calc(var(--u) * 10); right: max(calc(var(--u) * 10), env(safe-area-inset-right));
+  width: max(40px, calc(var(--u) * 42)); height: max(40px, calc(var(--u) * 42)); padding: 0; z-index: 2;
+  font-size: calc(var(--u) * 19); line-height: 1; color: var(--ivory);
+  background: #470a22; border: calc(var(--u) * 2) solid var(--gold); border-radius: 50%; cursor: pointer;
 }
 
 #panel {
-  position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
-  width: min(92vw, 420px); max-height: 92dvh; overflow-y: auto;
-  padding: 22px 20px; text-align: center;
-  background: #120b33e0; border: 1px solid #ffd27a80; border-radius: 20px;
-  display: flex; flex-direction: column; gap: 12px;
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: calc(var(--u) * 22) calc(var(--u) * 16) calc(var(--u) * 12); gap: calc(var(--u) * 7); text-align: center;
+  background: radial-gradient(ellipse 50% 58% at 50% 50%, #17051fe0 40%, #17051f00 100%);
 }
 #panel.locked { pointer-events: none; }
+#panel > * { position: relative; }
+#rangoli {
+  position: absolute; left: 50%; top: 50%; width: calc(var(--u) * 390); height: calc(var(--u) * 390);
+  margin: calc(var(--u) * -195) 0 0 calc(var(--u) * -195); opacity: .34; pointer-events: none;
+  animation: turn 150s linear infinite;
+}
+:lang(bn) #rangoli { filter: grayscale(1) brightness(2.1); opacity: .26; } /* Bengal paints alpona in white */
+@keyframes turn { to { transform: rotate(360deg); } }
+
 h1 {
-  font-size: clamp(34px, 11vw, 46px); line-height: 1.2; font-weight: 800;
-  color: #ffd27a; text-shadow: 0 0 22px #ff9d3c99;
+  font: 400 calc(var(--u) * 68)/1.06 var(--title), serif;
+  padding: .36em .12em .16em; margin: -.3em 0 -.12em; /* gradient text paints only inside its box; keeps tall vowel signs whole */
+  background: linear-gradient(#fff6c0, #ffd65c 46%, #ff9a1a);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 calc(var(--u) * 3) 0 #7a1414) drop-shadow(0 0 calc(var(--u) * 14) #ff7a1a99);
 }
-#from { font-size: 19px; color: #ffb3c7; margin-top: -8px; }
-#tagline { font-size: 16px; line-height: 1.4; }
-#result b { font-size: 60px; line-height: 1.1; color: #fff; font-variant-numeric: tabular-nums; }
+:lang(bn) h1 { font-size: calc(var(--u) * 72); }
+#from { font: 600 calc(var(--u) * 20)/1.1 "Baloo Da 2", sans-serif; color: #ffb3d1; margin-top: calc(var(--u) * -6); }
+#tagline { font-size: calc(var(--u) * 16.5); line-height: 1.2; font-weight: 600; text-shadow: 0 1px 3px #000; }
 
-#legend { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-#legend li { font-size: 12.5px; line-height: 1.3; }
-#legend canvas { width: 52px; height: 52px; display: block; margin: 0 auto; }
-#legend b { display: block; color: #ffd27a; }
-#legend .bad b { color: #ff7a6b; }
+#legend {
+  list-style: none; padding: calc(var(--u) * 4) calc(var(--u) * 8) calc(var(--u) * 3); display: flex; gap: calc(var(--u) * 2);
+  background: linear-gradient(#6b1238e8, #3c0a24e8);
+  border: calc(var(--u) * 1.5) solid var(--gold); border-radius: calc(var(--u) * 12);
+  box-shadow: 0 0 0 calc(var(--u) * 3) #3c0a24, 0 0 0 calc(var(--u) * 4) var(--gold);
+}
+#legend li { width: calc(var(--u) * 80); font-size: calc(var(--u) * 12.5); line-height: 1.12; font-weight: 600; white-space: nowrap; }
+#legend img { display: block; width: calc(var(--u) * 40); height: calc(var(--u) * 40); margin: 0 auto calc(var(--u) * 2); }
+#legend b { display: block; color: var(--pale); font-weight: 800; font-size: calc(var(--u) * 13); }
+#legend .bad b { color: #ff9a8c; }
 
+#result { display: flex; align-items: baseline; justify-content: center; gap: calc(var(--u) * 12); }
+#result small { font-size: calc(var(--u) * 17); font-weight: 600; }
+#final { font: 400 calc(var(--u) * 58)/1 var(--title), serif; color: #fff; text-shadow: 0 calc(var(--u) * 3) 0 #7a1414, 0 0 calc(var(--u) * 16) #ff7a1a; }
+#rank { font: 400 calc(var(--u) * 24)/1.1 var(--title), serif; color: var(--pale); }
+
+.actions { display: flex; gap: calc(var(--u) * 12); align-items: center; }
 #play, #share {
-  display: block; min-height: 50px; padding: 13px; border: 0; border-radius: 14px;
-  font: inherit; font-size: 18px; font-weight: 700; text-decoration: none; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; min-height: max(42px, calc(var(--u) * 48)); padding: calc(var(--u) * 7) calc(var(--u) * 26) calc(var(--u) * 5);
+  border-radius: calc(var(--u) * 26); font-weight: 800; text-decoration: none; cursor: pointer; font-family: inherit; line-height: 1.2;
 }
-#play { background: linear-gradient(#ffc24d, #ff8a1f); color: #2b1000; }
-#share { background: #25d366; color: #05240f; }
-#nameBox { display: block; font-size: 13.5px; text-align: left; }
-#nameBox input {
-  display: block; width: 100%; margin-top: 5px; padding: 11px 12px; font: inherit; font-size: 16px;
-  color: #fff; background: #ffffff14; border: 1px solid #ffd27a66; border-radius: 10px; user-select: text; -webkit-user-select: text;
+#play {
+  font-size: calc(var(--u) * 23); color: #4a0f0f; background: linear-gradient(#ffe08a, #ff9a1a);
+  border: calc(var(--u) * 2.5) solid var(--ivory);
+  box-shadow: 0 0 0 calc(var(--u) * 2) #b5531a, 0 0 calc(var(--u) * 22) #ff9a1a;
+  animation: glow 1.5s ease-in-out infinite alternate;
 }
-button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+@keyframes glow { to { box-shadow: 0 0 0 calc(var(--u) * 2) #b5531a, 0 0 calc(var(--u) * 6) #ff9a1a; transform: scale(1.04); } }
+#share { font-size: calc(var(--u) * 17); color: #fff; background: #128c5e; border: calc(var(--u) * 2) solid #7fe8bd; }
+#nameBtn {
+  min-height: 30px; padding: 0 calc(var(--u) * 10); font-family: inherit; font-size: calc(var(--u) * 14); font-weight: 600; line-height: 1.2; color: var(--pale); text-shadow: 0 1px 3px #000, 0 0 6px #000;
+  background: none; border: 0; text-decoration: underline; text-underline-offset: 3px; cursor: pointer;
+}
+button:focus-visible, a:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { #rangoli, #play { animation: none; } }

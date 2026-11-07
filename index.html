@@ -3,48 +3,59 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Happy Diwali! Burst some crackers</title>
-<meta property="og:title" content="🪔 Happy Diwali! Burst some crackers">
-<meta property="og:description" content="30 seconds. How many can you burst? Beat my score!">
+<title>Happy Diwali! Tap to Play</title>
+<meta property="og:title" content="🪔 Happy Diwali! Tap to Play">
+<meta property="og:description" content="Burst crackers, dodge the phuss, beat your friends!">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://newrishav-debug.github.io/HappyDiwali/">
-<meta property="og:image" content="https://newrishav-debug.github.io/HappyDiwali/preview-en.jpg">
+<meta property="og:image" content="https://newrishav-debug.github.io/HappyDiwali/preview-en.jpg?v=3">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#0b0826">
+<meta name="theme-color" content="#17051f">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪔</text></svg>">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<canvas id="sky" aria-label="Night sky with crackers to tap"></canvas>
-<div id="hud" hidden>
-  <div><small id="scoreLabel"></small><b id="score"></b></div>
-  <div class="right"><small id="timeLabel"></small><b id="time"></b></div>
+<div id="stage">
+  <div id="bg"></div>
+  <canvas id="sky" aria-label="Night sky full of crackers to tap"></canvas>
+  <div id="toran"></div>
+  <div id="hud" hidden>
+    <div class="plaque" id="scoreBox"><small id="scoreLabel"></small><b id="score"></b></div>
+    <div class="plaque" id="timeBox"><small id="timeLabel"></small><b id="time"></b></div>
+  </div>
+  <button id="mute" type="button"></button>
+  <main id="panel">
+    <img id="rangoli" src="art/rangoli.svg" alt="">
+    <h1 id="title"></h1>
+    <p id="from" hidden></p>
+    <p id="tagline"></p>
+    <div id="result" aria-live="polite" hidden><small id="overLabel"></small><b id="final"></b><span id="rank"></span></div>
+    <ul id="legend"></ul>
+    <div class="actions">
+      <button id="play" type="button"></button>
+      <a id="share" target="_blank" rel="noopener"></a>
+    </div>
+    <button id="nameBtn" type="button" hidden></button>
+  </main>
 </div>
-<button id="mute" type="button"></button>
-<main id="panel">
-  <h1 id="title"></h1>
-  <p id="from" hidden></p>
-  <p id="tagline"></p>
-  <div id="result" aria-live="polite" hidden><small id="overLabel"></small><b id="final"></b></div>
-  <ul id="legend"></ul>
-  <button id="play" type="button"></button>
-  <label id="nameBox" hidden><span id="nameLabel"></span><input id="name" maxlength="30" autocomplete="given-name"></label>
-  <a id="share" target="_blank" rel="noopener"></a>
-</main>
 <script>
 window.T = {
   locale: 'en-IN', named: true,
   title: 'Happy Diwali', from: n => `from ${n}`,
-  tagline: 'Burst as many crackers as you can in 30 seconds!',
-  play: 'Burst crackers', again: 'Play again', score: 'Score', time: 'Time', over: 'Your score',
-  share: 'Send to WhatsApp', nameLabel: 'Your name, to add it to the greeting', sound: 'Sound', mute: 'Mute',
-  invite: n => `🪔 Happy Diwali${n ? ` from ${n}` : ''}! How many crackers can you burst in 30 seconds? 🎆`,
-  brag: (s, n) => `🪔 Happy Diwali${n ? ` from ${n}` : ''}! I scored ${s} bursting crackers. Beat that! 🎆`,
-  names: { chakri: 'Chakri', anar: 'Anar', rocket: 'Rocket', bomb: 'Bomb', ladi: 'Ladi', dud: 'Dud' },
+  tagline: 'Burst crackers, dodge the phuss, beat your friends!',
+  play: 'Tap to Play', again: 'Play Again', score: 'Score', time: 'Time', over: 'You scored',
+  share: 'Send on WhatsApp', nameAdd: '✎ Add your name to the greeting', nameSet: n => `✎ From ${n}`, namePrompt: 'Your name, to add to the greeting',
+  sound: 'Turn sound on', mute: 'Turn sound off',
+  invite: n => `🪔 Happy Diwali${n ? ` from ${n}` : ''}! Come burst some crackers with me 🎆`,
+  brag: (s, n, r) => `🪔 Happy Diwali${n ? ` from ${n}` : ''}! I scored ${s} and I'm officially a ${r}. Beat that! 🎆`,
+  names: { chakri: 'Chakri', anar: 'Anar', rocket: 'Rocket', bomb: 'Sutli Bomb', ladi: 'Ladi', dud: 'Phuss!' },
+  shouts: { chakri: 'Ghoom!', anar: 'Wah!', rocket: 'Sharrr!', bomb: 'Dhamaka!', ladi: 'Tadatad!', dud: 'Phusss…' },
+  ranks: [[0, 'Phuss Cracker'], [300, 'Chhota Patakha'], [600, 'Phuljhari Star'], [900, 'Rocket Raja'], [1200, 'Sutli Samrat']],
 };
 </script>
+<script src="music.js"></script>
 <script src="game.js"></script>
 </body>
 </html>
