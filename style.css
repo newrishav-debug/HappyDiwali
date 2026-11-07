@@ -73,6 +73,7 @@ h1 {
 }
 :lang(bn) h1 { font-size: calc(var(--u) * 92); line-height: 1.04; }
 #from { font-size: calc(var(--u) * 23); line-height: 1.1; font-weight: 600; color: #ffb3d1; margin-top: calc(var(--u) * -6); }
+:lang(bn) #from { font: 400 calc(var(--u) * 42)/1.25 var(--title), serif; color: var(--ivory); text-shadow: 0 calc(var(--u) * 2) 0 #7a1414; }
 #tagline { font-size: calc(var(--u) * 16.5); line-height: 1.25; font-weight: 600; max-width: calc(var(--u) * 320); text-shadow: 0 1px 3px #000; }
 
 #legend {

@@ -403,7 +403,7 @@ function start(T) {
   $('overLabel').textContent = T.over;
 
   const fromPath = location.pathname.match(/\/from\/([^/]+)/);
-  const sender = T.named ? cleanName(fromPath ? decodeURIComponent(fromPath[1]) : new URLSearchParams(location.search).get('from')) : '';
+  const sender = T.signature || (T.named ? cleanName(fromPath ? decodeURIComponent(fromPath[1]) : new URLSearchParams(location.search).get('from')) : '');
   if (sender) { $('from').textContent = T.from(sender); $('from').hidden = false; }
   if (T.named && $('nameDialog').showModal) {
     const dlg = $('nameDialog');
