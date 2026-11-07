@@ -314,20 +314,25 @@ await shot(page(tallScene(), 900, 1800), 900, 1800, art('scene.jpg'), 86);
 
 const uri = f => `data:image/svg+xml;base64,${fs.readFileSync(art(f)).toString('base64')}`;
 const font = f => `data:font/woff2;base64,${fs.readFileSync(`${root}/fonts/${f}`).toString('base64')}`;
-const preview = (title, tag, fam, file, cta) => `<style>
-@font-face{font-family:T;src:url(${font(fam)})}@font-face{font-family:U;src:url(${font('balooda-bengali.woff2')})}@font-face{font-family:U;src:url(${font('balooda-latin.woff2')})}
-.s{position:absolute;left:-150px;top:-120px;transform-origin:0 0;width:1600px;height:800px;transform:scale(.9375)}.s svg{display:block}
-.r{position:absolute;left:325px;top:40px;width:550px;height:550px;opacity:.95}
-.v{position:absolute;inset:0;background:radial-gradient(ellipse 500px 300px at 50% 47%,#17051fc4 35%,#17051f00 100%)}
-.t{position:absolute;inset:0;text-align:center;color:#fff4d6;font-family:U;padding-top:165px}
-h1{font:400 118px/1.08 T;padding:.34em .12em .16em;margin:-.34em 0 -.16em;background:linear-gradient(#fff6c0,#ffd65c 45%,#ff9a1a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 0 #7a1414) drop-shadow(0 0 22px #ff7a1a)}
-p{font-size:32px;font-weight:600;margin-top:4px}
-b{display:inline-block;margin-top:14px;padding:6px 44px 4px;font-size:42px;font-weight:800;color:#4a0f0f;background:linear-gradient(#ffe08a,#ff9a1a);border:4px solid #fff4d6;outline:3px solid #b5531a;border-radius:50px}
+// The link preview is the greeting itself: nothing to read but who it is from, nothing that needs a tap.
+function card() {
+  const W = 1200, H = 630;
+  let s = skyBands(W, H, [0, .2, .38, .54, .68, .8]) + skyDots(W, 480, 70, 10);
+  s += burst(165, 235, 118, ['#ff5fa2', '#ffd65c', CUT]) + burst(1035, 225, 124, ['#7dffc7', CUT, '#39c9c2']);
+  s += burst(285, 425, 62, ['#ffd65c', '#ff8a1f', CUT]) + burst(925, 430, 66, ['#ff8a1f', '#ffd65c', '#ff5fa2']);
+  s += `<rect y="520" width="${W}" height="16" fill="#0b7a75" stroke="${INK}" stroke-width="${LINE}"/>` + floor(W, 534, H);
+  for (const [i, x] of [100, 240, 380, 520, 680, 820, 960, 1100].entries()) s += diya(x, 562 + (i % 2) * 8, 1.1, true);
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="position:absolute;left:0;top:0"><g stroke-linejoin="round" stroke-linecap="round">${s}</g></svg>`;
+}
+const preview = (lines, fam, size, top) => `<style>
+@font-face{font-family:T;src:url(${font(fam)})}
+.t{position:absolute;left:0;right:0;top:${top}px;text-align:center}
+h1{font:400 ${size}px/1.02 T;padding:.3em .12em .16em;margin:-.3em 0 -.16em;background:linear-gradient(#fff6c0,#ffd65c 46%,#ff9a1a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 5px 0 #7a1414) drop-shadow(0 0 26px #ff7a1aaa)}
 .o{position:absolute;left:0;right:0;top:0;height:92px;background:url(${uri('toran.svg')}) repeat-x;background-size:auto 100%}
-</style><div class=s>${scene(true)}</div><img class=r src="${uri('rangoli.svg')}"><div class=v></div><div class=o></div><div class=t><h1>${title}</h1>${tag === ' ' ? '<p style="height:50px"></p>' : tag ? `<p>${tag}</p>` : ''}<b>${cta}</b></div>`;
-await shot(page(preview('Happy Diwali', 'Burst crackers. Beat your friends.', 'yatra-latin.woff2', 'en', 'Tap to Play'), 1200, 630), 1200, 630, `${root}/preview-en.jpg`, 84);
-await shot(page(preview('শুভ দীপাবলি', '', 'galada-bengali.woff2', 'bn', 'Tap to Play'), 1200, 630), 1200, 630, `${root}/preview-bn.jpg`, 84);
+</style>${card()}<div class=o></div><div class=t><h1>${lines[0]}<br>${lines[1]}</h1></div>`;
+await shot(page(preview(['Happy', 'Diwali'], 'yatra-latin.woff2', 140, 128), 1200, 630), 1200, 630, `${root}/preview-en.jpg`, 88);
+await shot(page(preview(['শুভ', 'দীপাবলি'], 'galada-bengali.woff2', 146, 118), 1200, 630), 1200, 630, `${root}/preview-bn.jpg`, 88);
 // The server writes the sender's name into the gap under the title.
-await shot(page(preview('Happy Diwali', ' ', 'yatra-latin.woff2', 'en', 'Tap to Play'), 1200, 630).replace('<style>', '<style>html{zoom:.6667}'), 800, 420, `${root}/preview-base.png`);
+await shot(page(preview(['Happy', 'Diwali'], 'yatra-latin.woff2', 132, 98), 1200, 630).replace('<style>', '<style>html{zoom:.6667}'), 800, 420, `${root}/preview-base.png`);
 await b.close();
 console.log('art done', DIYAS.map(d => d.join(',')).join(' '));

@@ -24,6 +24,8 @@ const T = { ranks, num: n => String(n), invite: n => `hi ${n}`, brag: (s, n, r) 
 const text = href => decodeURIComponent(href.split('?text=')[1]);
 assert.equal(text(shareHref(T, 'https://x.co/', '', 340)), 'got 340  mid https://x.co/');
 assert.equal(text(shareHref(T, 'https://x.co/', 'A&B', null)), 'hi A&B https://x.co/from/A%26B', 'name is URL-safe');
+const quiet = { ...T, invite: () => '' };
+assert.equal(text(shareHref(quiet, 'https://x.co/', '', null)), 'https://x.co/', 'a greeting with nothing to say is just the link');
 assert.ok(shareHref(T, 'https://x.co/', 'A&B', 5).startsWith('https://wa.me/?text='));
 assert.equal(text(shareHref(T, 'https://x.co/', '', 0)), 'got 0  low https://x.co/', 'a zero score still shares');
 
@@ -35,7 +37,7 @@ import('./api/page.mjs').then(async ({ GET: page }) => {
   assert.ok(!html.includes('<script>'), 'a name cannot inject a script');
   assert.ok(html.includes('<base href="/">'), 'assets still load from a /from/name address');
   const ok = await (await page(new Request('https://s.co/api/page?from=Priya'))).text();
-  assert.ok(ok.includes('content="https://s.co/api/preview?from=Priya"'), 'preview image carries the name');
+  assert.ok(ok.includes('content="https://s.co/api/preview?v=2&from=Priya"'), 'preview image carries the name');
   assert.ok(ok.includes('from Priya'), 'preview title carries the name');
   console.log('ok');
 });

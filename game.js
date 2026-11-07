@@ -16,7 +16,7 @@ function pick(items, x, y) {
 function shareHref(T, base, name, score) {
   const link = name ? `${base}from/${encodeURIComponent(name)}` : base;
   const msg = score == null ? T.invite(name) : T.brag(T.num(score), name, rankFor(T.ranks, score));
-  return `https://wa.me/?text=${encodeURIComponent(`${msg} ${link}`)}`;
+  return `https://wa.me/?text=${encodeURIComponent(`${msg} ${link}`.trim())}`;
 }
 
 if (typeof module !== 'undefined') module.exports = { nextScore, cleanName, pick, shareHref, rankFor };

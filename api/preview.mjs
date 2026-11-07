@@ -10,7 +10,7 @@ export async function GET(req) {
   if (!DRAWABLE.test(name)) return Response.redirect(new URL('/preview-en.jpg', url), 302);
 
   const font = await (await fetch(new URL('/fonts/yatra-full.ttf', url))).arrayBuffer();
-  const size = name.length <= 14 ? 50 : name.length <= 22 ? 40 : 30;
+  const size = name.length <= 14 ? 56 : name.length <= 22 ? 44 : 34;
   const text = `from ${name}`;
   const image = new ImageResponse({
     type: 'div',
@@ -18,7 +18,7 @@ export async function GET(req) {
       style: { width: 800, height: 420, display: 'flex', position: 'relative' },
       children: [
         { type: 'img', props: { src: new URL('/preview-base.png', url).href, width: 800, height: 420, style: { position: 'absolute', left: 0, top: 0 } } },
-        { type: 'div', props: { style: { position: 'absolute', left: 0, right: 0, top: 183, height: 62, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Yatra', fontSize: size * .8, color: '#ffc4dc', textShadow: '0 2px 0 #4a0f2e' }, children: text } },
+        { type: 'div', props: { style: { position: 'absolute', left: 0, right: 0, top: 248, height: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Yatra', fontSize: size * .8, color: '#fff4d6', textShadow: '0 2px 0 #7a1414' }, children: text } },
       ],
     },
   }, { width: 800, height: 420, fonts: [{ name: 'Yatra', data: font, weight: 400, style: 'normal' }] });
