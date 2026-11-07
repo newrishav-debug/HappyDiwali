@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Happy Diwali! Burst some crackers</title>
+<meta property="og:title" content="🪔 Happy Diwali! Burst some crackers">
+<meta property="og:description" content="30 seconds. How many can you burst? Beat my score!">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://newrishav-debug.github.io/HappyDiwali/">
+<meta property="og:image" content="https://newrishav-debug.github.io/HappyDiwali/preview-en.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0b0826">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪔</text></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="sky" aria-label="Night sky with crackers to tap"></canvas>
+<div id="hud" hidden>
+  <div><small id="scoreLabel"></small><b id="score"></b></div>
+  <div class="right"><small id="timeLabel"></small><b id="time"></b></div>
+</div>
+<button id="mute" type="button"></button>
+<main id="panel">
+  <h1 id="title"></h1>
+  <p id="from" hidden></p>
+  <p id="tagline"></p>
+  <div id="result" aria-live="polite" hidden><small id="overLabel"></small><b id="final"></b></div>
+  <ul id="legend"></ul>
+  <button id="play" type="button"></button>
+  <label id="nameBox" hidden><span id="nameLabel"></span><input id="name" maxlength="30" autocomplete="given-name"></label>
+  <a id="share" target="_blank" rel="noopener"></a>
+</main>
+<script>
+window.T = {
+  locale: 'en-IN', named: true,
+  title: 'Happy Diwali', from: n => `from ${n}`,
+  tagline: 'Burst as many crackers as you can in 30 seconds!',
+  play: 'Burst crackers', again: 'Play again', score: 'Score', time: 'Time', over: 'Your score',
+  share: 'Send to WhatsApp', nameLabel: 'Your name, to add it to the greeting', sound: 'Sound', mute: 'Mute',
+  invite: n => `🪔 Happy Diwali${n ? ` from ${n}` : ''}! How many crackers can you burst in 30 seconds? 🎆`,
+  brag: (s, n) => `🪔 Happy Diwali${n ? ` from ${n}` : ''}! I scored ${s} bursting crackers. Beat that! 🎆`,
+  names: { chakri: 'Chakri', anar: 'Anar', rocket: 'Rocket', bomb: 'Bomb', ladi: 'Ladi', dud: 'Dud' },
+};
+</script>
+<script src="game.js"></script>
+</body>
+</html>

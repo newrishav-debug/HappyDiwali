@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>শুভ দীপাবলি! বাজি ফাটাও</title>
+<meta property="og:title" content="🪔 শুভ দীপাবলি! বাজি ফাটাও">
+<meta property="og:description" content="৩০ সেকেন্ডে কত বাজি ফাটাতে পারো? পারলে আমার স্কোর হারাও!">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://newrishav-debug.github.io/HappyDiwali/bn.html">
+<meta property="og:image" content="https://newrishav-debug.github.io/HappyDiwali/preview-bn.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0b0826">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪔</text></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="sky" aria-label="রাতের আকাশে বাজি ফাটানোর খেলা"></canvas>
+<div id="hud" hidden>
+  <div><small id="scoreLabel"></small><b id="score"></b></div>
+  <div class="right"><small id="timeLabel"></small><b id="time"></b></div>
+</div>
+<button id="mute" type="button"></button>
+<main id="panel">
+  <h1 id="title"></h1>
+  <p id="from" hidden></p>
+  <p id="tagline"></p>
+  <div id="result" aria-live="polite" hidden><small id="overLabel"></small><b id="final"></b></div>
+  <ul id="legend"></ul>
+  <button id="play" type="button"></button>
+  <label id="nameBox" hidden><span id="nameLabel"></span><input id="name" maxlength="30"></label>
+  <a id="share" target="_blank" rel="noopener"></a>
+</main>
+<script>
+window.T = {
+  locale: 'bn-IN', named: false,
+  title: 'শুভ দীপাবলি', from: () => '',
+  tagline: '৩০ সেকেন্ডে যত পারো বাজি ফাটাও!',
+  play: 'বাজি ফাটাও', again: 'আবার খেলো', score: 'স্কোর', time: 'সময়', over: 'তোমার স্কোর',
+  share: 'হোয়াটসঅ্যাপে পাঠাও', nameLabel: '', sound: 'শব্দ চালু', mute: 'শব্দ বন্ধ',
+  invite: () => '🪔 শুভ দীপাবলি! ৩০ সেকেন্ডে কত বাজি ফাটাতে পারো? 🎆',
+  brag: s => `🪔 শুভ দীপাবলি! বাজি ফাটিয়ে আমার স্কোর ${s}। পারলে হারাও! 🎆`,
+  names: { chakri: 'চরকি', anar: 'তুবড়ি', rocket: 'রকেট', bomb: 'চকোলেট বোম', ladi: 'কালীপটকা', dud: 'ভেজা বাজি' },
+};
+</script>
+<script src="game.js"></script>
+</body>
+</html>
