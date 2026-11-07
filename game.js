@@ -1,11 +1,8 @@
 const ROUND = 30, TAP_SLOP = 14, MAX_PARTICLES = 500;
 
 const nextScore = (score, pts) => Math.max(0, score + pts);
-const cleanName = s => [...String(s || '').trim()].slice(0, 30).join('');
+const cleanName = s => [...String(s || '').replace(/[\/\\]/g, ' ').trim()].slice(0, 30).join(''); // a slash would break the /from/name link
 const rankFor = (ranks, score) => ranks.reduce((got, [min, name]) => (score >= min ? name : got), ranks[0][1]);
-
-// Screen point to stage point. An upright phone shows the stage rotated 90° clockwise.
-const toStage = (x, y, screenW, rotated) => (rotated ? [y, screenW - x] : [x, y]);
 
 function pick(items, x, y) {
   let best = null, bestD = Infinity;
@@ -17,12 +14,12 @@ function pick(items, x, y) {
 }
 
 function shareHref(T, base, name, score) {
-  const link = name ? `${base}?from=${encodeURIComponent(name)}` : base;
+  const link = name ? `${base}from/${encodeURIComponent(name)}` : base;
   const msg = score == null ? T.invite(name) : T.brag(T.num(score), name, rankFor(T.ranks, score));
   return `https://wa.me/?text=${encodeURIComponent(`${msg} ${link}`)}`;
 }
 
-if (typeof module !== 'undefined') module.exports = { nextScore, cleanName, pick, shareHref, rankFor, toStage };
+if (typeof module !== 'undefined') module.exports = { nextScore, cleanName, pick, shareHref, rankFor };
 if (typeof document !== 'undefined') start(window.T);
 
 function start(T) {
@@ -30,56 +27,59 @@ function start(T) {
   const $ = id => document.getElementById(id);
   const stage = $('stage'), sky = $('sky'), g = sky.getContext('2d');
   const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let W, H, S, rotated = false, art = { s: 1, ox: 0, oy: 0 };
+  const phone = matchMedia('(pointer: coarse)').matches;
+  let W, H, S, sideways = false, art = { s: 1, ox: 0, oy: 0 };
 
   function resize() {
-    const iw = innerWidth, ih = innerHeight;
-    rotated = ih > iw;
-    W = Math.max(iw, ih); H = Math.min(iw, ih);
-    S = Math.min(W / 844, H / 390, 1.7);
+    sideways = phone && innerWidth > innerHeight;
+    $('turn').hidden = !sideways; // browsers cannot lock an iPhone's rotation, so ask and pause instead
+    H = innerHeight; W = Math.min(innerWidth, Math.round(H * .62)); // a computer gets a phone-shaped column
+    S = Math.min(W / 390, H / 720, 1.7);
     stage.style.width = W + 'px'; stage.style.height = H + 'px';
-    stage.style.transform = rotated ? `translateX(${iw}px) rotate(90deg)` : 'none';
+    stage.style.left = (innerWidth - W) / 2 + 'px';
     stage.style.setProperty('--u', S + 'px');
     const dpr = Math.min(devicePixelRatio || 1, 2);
     sky.width = W * dpr; sky.height = H * dpr;
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
     // Same fit as the CSS background (cover, centre bottom), so flames sit on the painted diyas.
-    const s = Math.max(W / 1600, H / 800);
-    art = { s, ox: (W - 1600 * s) / 2, oy: H - 800 * s };
+    const s = Math.max(W / 900, H / 1800);
+    art = { s, ox: (W - 900 * s) / 2, oy: H - 1800 * s };
   }
   addEventListener('resize', resize);
   addEventListener('orientationchange', () => setTimeout(resize, 250));
   resize();
 
   /* ---------- sound ---------- */
-  let ac, noise, muted = false, musicGain = null;
-  const music = new Promise(r => setTimeout(r, 200)).then(renderMusic);
+  // Streamed through an element, not decoded whole: a full song decoded in memory can crash a budget phone.
+  const track = new Audio('Dancing_Under_Clay_Lamps.mp3');
+  track.loop = true;
+  let ac, noise, sfx, musicOn = true, soundOn = true;
   function initAudio() {
-    if (ac) { ac.resume(); return; }
-    const AC = window.AudioContext || window.webkitAudioContext;
-    if (!AC) return;
-    ac = new AC();
-    ac.resume();
-    noise = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
-    const d = noise.getChannelData(0);
-    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-    music.then(buf => {
-      const src = ac.createBufferSource();
-      musicGain = ac.createGain();
-      musicGain.gain.value = 0;
-      musicGain.gain.linearRampToValueAtTime(muted ? 0 : .6, ac.currentTime + 1.2);
-      src.buffer = buf; src.loop = true;
-      src.connect(musicGain); musicGain.connect(ac.destination);
-      src.start();
-    }).catch(() => {}); // an old browser without offline audio still gets the crackers
+    if (!ac) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) {
+        ac = new AC();
+        noise = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
+        const d = noise.getChannelData(0);
+        for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+        sfx = ac.createGain(); sfx.gain.value = soundOn ? 1 : 0; sfx.connect(ac.destination);
+      }
+    }
+    if (ac) ac.resume();
+    if (musicOn && track.paused) track.play().catch(() => {}); // retried on the next tap if the browser says not yet
   }
   // Without this the music keeps playing over WhatsApp once someone taps Send.
-  document.addEventListener('visibilitychange', () => { if (ac) document.hidden ? ac.suspend() : ac.resume(); });
-  addEventListener('pagehide', () => ac && ac.suspend());
-  stage.addEventListener('pointerdown', initAudio, { capture: true });
+  function quiet(off) {
+    if (off) { track.pause(); if (ac) ac.suspend(); }
+    else if (ac) { ac.resume(); if (musicOn) track.play().catch(() => {}); }
+  }
+  document.addEventListener('visibilitychange', () => quiet(document.hidden));
+  addEventListener('pagehide', () => quiet(true));
+  // iPhones only allow audio to start on a finished tap, other phones as soon as the finger lands.
+  for (const type of ['pointerdown', 'click']) stage.addEventListener(type, initAudio, { capture: true });
 
   function bang(dur, cutoff, vol) {
-    if (!ac || muted) return;
+    if (!ac) return;
     const now = ac.currentTime, src = ac.createBufferSource(), f = ac.createBiquadFilter(), v = ac.createGain();
     src.buffer = noise;
     f.type = 'lowpass';
@@ -87,17 +87,17 @@ function start(T) {
     f.frequency.exponentialRampToValueAtTime(70, now + dur);
     v.gain.setValueAtTime(vol, now);
     v.gain.exponentialRampToValueAtTime(.001, now + dur);
-    src.connect(f); f.connect(v); v.connect(ac.destination);
+    src.connect(f); f.connect(v); v.connect(sfx);
     src.start(now, Math.random() * .5, dur);
   }
   function thump(from, to, dur, vol) {
-    if (!ac || muted) return;
+    if (!ac) return;
     const now = ac.currentTime, o = ac.createOscillator(), v = ac.createGain();
     o.frequency.setValueAtTime(from, now);
     o.frequency.exponentialRampToValueAtTime(to, now + dur);
     v.gain.setValueAtTime(vol, now);
     v.gain.exponentialRampToValueAtTime(.001, now + dur);
-    o.connect(v); v.connect(ac.destination);
+    o.connect(v); v.connect(sfx);
     o.start(now); o.stop(now + dur);
   }
   const buzz = ms => navigator.vibrate && navigator.vibrate(ms);
@@ -140,27 +140,27 @@ function start(T) {
   /* ---------- crackers ---------- */
   const TYPES = {
     chakri: {
-      pts: 10, size: 90, r: 38, life: 2.6, weight: 28,
-      place: () => ({ x: rnd(70 * S, W - 70 * S), y: rnd(H * .34, H * .8), vx: from([-1, 1]) * rnd(50, 110) * S }),
+      pts: 10, size: 84, r: 36, life: 2.6, weight: 28,
+      place: () => ({ x: rnd(55 * S, W - 55 * S), y: rnd(H * .22, H * .82), vx: from([-1, 1]) * rnd(30, 70) * S }),
       spin: 10,
       emit(c) { const a = c.age * 10, q = 40 * S; spark(c.x + Math.cos(a) * q, c.y + Math.sin(a) * q, -Math.sin(a) * 170 * S, Math.cos(a) * 170 * S, .45, from(['#ffd65c', '#ff5fa2', '#fff']), 120 * S); },
       burst(c) { ring(c.x, c.y, 54, 210, ['#ff5fa2', '#ffd65c', '#7dffc7', '#fff']); bang(.22, 3200, .4); },
     },
     anar: {
-      pts: 15, size: 92, r: 38, life: 2.3, weight: 24,
-      place: () => ({ x: rnd(70 * S, W - 70 * S), y: rnd(H * .5, H * .8) }),
+      pts: 15, size: 86, r: 36, life: 2.3, weight: 24,
+      place: () => ({ x: rnd(55 * S, W - 55 * S), y: rnd(H * .45, H * .84) }),
       emit(c) { spark(c.x + rnd(-3, 3) * S, c.y - 38 * S, rnd(-44, 44) * S, -rnd(120, 240) * S, .6, from(['#ffd65c', '#fff', '#ff9a1a']), 300 * S); },
       burst(c) { fountain(c.x, c.y - 30 * S, 86, 520, ['#ffd65c', '#ff9a1a', '#fff', '#ffe89e']); bang(.4, 1900, .46); },
     },
     rocket: {
-      pts: 25, size: 100, r: 38, life: 4, weight: 14,
-      place: () => ({ x: rnd(100 * S, W - 100 * S), y: H + 50 * S, vx: rnd(-34, 34) * S, vy: -rnd(.4, .52) * H }),
+      pts: 25, size: 94, r: 36, life: 4, weight: 14,
+      place: () => ({ x: rnd(70 * S, W - 70 * S), y: H + 50 * S, vx: rnd(-20, 20) * S, vy: -rnd(.36, .46) * H }),
       emit(c) { spark(c.x, c.y + 24 * S, rnd(-24, 24) * S, rnd(70, 170) * S, .38, from(['#ffb13c', '#fff4d6', '#ff5a36']), 0); },
       burst(c) { ring(c.x, c.y, 104, 320, ['#7dffc7', '#39c9c2', '#fff', '#ffd65c']); thump(900, 240, .22, .16); bang(.5, 2300, .55); },
     },
     bomb: {
-      pts: 40, size: 88, r: 38, life: 1.35, weight: 12,
-      place: () => ({ x: rnd(70 * S, W - 70 * S), y: rnd(H * .3, H * .76) }),
+      pts: 40, size: 84, r: 36, life: 1.35, weight: 12,
+      place: () => ({ x: rnd(55 * S, W - 55 * S), y: rnd(H * .22, H * .78) }),
       emit(c) { spark(c.x + 11 * S, c.y - 33 * S, rnd(-70, 70) * S, rnd(-80, 20) * S, .3, from(['#fff', '#ffd65c']), 180 * S); },
       burst(c) {
         ring(c.x, c.y, 150, 430, ['#fff4d6', '#ffd65c', '#ff5a36', '#ff9a1a'], 1.1);
@@ -168,14 +168,14 @@ function start(T) {
       },
     },
     ladi: {
-      pts: 30, size: 104, r: 44, life: 2.5, weight: 12,
-      place: () => ({ x: rnd(70 * S, W - 70 * S), y: rnd(H * .34, H * .68), vy: 20 * S }),
+      pts: 30, size: 98, r: 40, life: 2.5, weight: 12,
+      place: () => ({ x: rnd(55 * S, W - 55 * S), y: rnd(H * .22, H * .72), vy: 20 * S }),
       sway: true,
       burst(c) { for (let i = 0; i < 8; i++) later.push({ at: i * .075, x: c.x + rnd(-14, 14) * S, y: c.y + (38 - i * 11) * S }); },
     },
     dud: {
-      pts: -20, size: 86, r: 34, life: 2.5, weight: 14,
-      place: () => ({ x: rnd(70 * S, W - 70 * S), y: rnd(H * .34, H * .8) }),
+      pts: -20, size: 82, r: 32, life: 2.5, weight: 14,
+      place: () => ({ x: rnd(55 * S, W - 55 * S), y: rnd(H * .22, H * .84) }),
       burst(c) { for (let i = 0; i < 14; i++) spark(c.x, c.y, rnd(-50, 50) * S, rnd(-50, 5) * S, .7, from(['#9aa0ad', '#6fc4ff']), 300 * S, 3); buzz(30); bang(.3, 340, .45); },
     },
   };
@@ -217,20 +217,21 @@ function start(T) {
   }
 
   /* ---------- living parts of the painted scene ---------- */
-  const DIYAS = [150, 278, 406, 534, 662, 938, 1066, 1194, 1322, 1450].map((x, i) => [x, 750 + (i % 2) * 14]);
+  const DIYAS = [100, 275, 450, 625, 800].map((x, i) => [x, 1680 + (i % 2) * 34]);
   function flames(t) {
-    const k = art.s * 1.05;
+    const k = art.s * 1.45;
     DIYAS.forEach(([ax, ay], i) => {
       const x = art.ox + ax * art.s, y = art.oy + ay * art.s;
       const f = Math.sin(t * 8.5 + i * 2.1) * .5 + Math.sin(t * 13 + i) * .3, h = (34 + f * 5) * k, w = (11 - f) * k, lean = Math.sin(t * 2.3 + i) * 2.5 * k;
       g.globalCompositeOperation = 'lighter';
-      g.globalAlpha = .62 + f * .1;
-      drawGlow('#ff9a1a', x, y - h * .5, 58 * k);
+      g.globalAlpha = .4 + f * .08;
+      drawGlow('#ff9a1a', x, y - h * .5, 52 * k);
       g.globalCompositeOperation = 'source-over';
       g.globalAlpha = 1; g.fillStyle = '#ffb52e';
       g.beginPath(); g.moveTo(x + lean, y - 2 * k - h);
       g.bezierCurveTo(x + w * 1.2, y - h * .45, x + w, y - 2 * k, x, y - 2 * k);
       g.bezierCurveTo(x - w, y - 2 * k, x - w * 1.2, y - h * .45, x + lean, y - 2 * k - h); g.fill();
+      g.strokeStyle = '#2a0a1e'; g.lineWidth = 2.4 * k; g.stroke();
       g.fillStyle = '#fff5c4';
       g.beginPath(); g.ellipse(x, y - 9 * k, w * .42, h * .28, 0, 0, 6.283); g.fill();
     });
@@ -262,10 +263,6 @@ function start(T) {
 
   function begin() {
     initAudio();
-    // Android can truly lock to landscape from fullscreen; iPhones cannot, and keep the rotated stage.
-    if (matchMedia('(pointer: coarse)').matches && document.documentElement.requestFullscreen && !document.fullscreenElement) {
-      document.documentElement.requestFullscreen().then(() => screen.orientation.lock('landscape')).catch(() => {});
-    }
     score = 0; timeLeft = ROUND; crackers = []; floats = []; later = []; petals = []; nextSpawn = .3;
     state = 'play';
     stage.classList.add('playing');
@@ -292,19 +289,22 @@ function start(T) {
     $('timeBox').classList.toggle('low', timeLeft <= 5);
   }
   function refreshShare() {
-    $('share').href = shareHref(T, location.origin + location.pathname, myName, state === 'end' ? score : null);
+    // document.baseURI, because a /from/name page sets <base> to the site root
+    const home = T.named ? new URL('.', document.baseURI).href : location.origin + location.pathname;
+    const href = shareHref(T, home, myName, state === 'end' ? score : null);
+    $('share').href = href;
+    if (T.named) $('nameSend').href = href;
   }
 
   sky.addEventListener('pointerdown', e => {
     if (state !== 'play') return;
-    const [x, y] = toStage(e.clientX, e.clientY, innerWidth, rotated);
-    const c = pick(crackers, x, y);
+    const c = pick(crackers, e.clientX - stage.offsetLeft, e.clientY);
     if (!c) return;
     crackers.splice(crackers.indexOf(c), 1);
     c.type.burst(c);
     score = nextScore(score, c.type.pts);
     floats.push({
-      x: Math.min(W - 90 * S, Math.max(90 * S, c.x)), y: Math.max(112 * S, c.y - 34 * S), age: 0,
+      x: Math.min(W - 70 * S, Math.max(70 * S, c.x)), y: Math.max(112 * S, c.y - 34 * S), age: 0,
       shout: T.shouts[c.key],
       pts: `${c.type.pts > 0 ? '+' : '−'}${T.num(Math.abs(c.type.pts))}`,
       color: c.type.pts > 0 ? '#ffe089' : '#a9d4ff',
@@ -319,7 +319,7 @@ function start(T) {
     const dt = Math.min((now - last) / 1000, .05), t = now / 1000;
     last = now;
 
-    if (state === 'play') {
+    if (state === 'play' && !sideways) {
       timeLeft -= dt;
       nextSpawn -= dt;
       if (nextSpawn <= 0) {
@@ -328,13 +328,12 @@ function start(T) {
       }
       if (Math.ceil(timeLeft) !== shownSec) { shownSec = Math.ceil(timeLeft); drawHud(); }
       if (timeLeft <= 0) finish();
-    } else if (!calm && (nextAmbient -= dt) <= 0) {
+    } else if (state !== 'play' && !calm && (nextAmbient -= dt) <= 0) {
       nextAmbient = rnd(.5, 1.3);
-      const side = from([rnd(W * .03, W * .24), rnd(W * .76, W * .97)]);
-      ring(side, rnd(H * .16, H * .46), 76, 210, from([['#ffd65c', '#fff'], ['#ff5fa2', '#ffd1e3', '#fff'], ['#7dffc7', '#fff'], ['#ff9a1a', '#ffd65c']]), 1.2, 95);
+      ring(rnd(W * .08, W * .92), rnd(H * .1, H * .34), 70, 170, from([['#ffd65c', '#fff'], ['#ff5fa2', '#ffd1e3', '#fff'], ['#7dffc7', '#fff'], ['#ff9a1a', '#ffd65c']]), 1.2, 95);
     }
 
-    for (const c of crackers) {
+    if (!sideways) for (const c of crackers) {
       c.age += dt; c.x += c.vx * dt; c.y += c.vy * dt;
       if (c.key === 'chakri' && (c.x < 50 * S || c.x > W - 50 * S)) c.vx *= -1;
       if (c.type.emit && Math.random() < .65) c.type.emit(c);
@@ -403,19 +402,24 @@ function start(T) {
   $('timeLabel').textContent = T.time;
   $('overLabel').textContent = T.over;
 
-  const sender = T.named ? cleanName(new URLSearchParams(location.search).get('from')) : '';
+  const fromPath = location.pathname.match(/\/from\/([^/]+)/);
+  const sender = T.named ? cleanName(fromPath ? decodeURIComponent(fromPath[1]) : new URLSearchParams(location.search).get('from')) : '';
   if (sender) { $('from').textContent = T.from(sender); $('from').hidden = false; }
-  if (T.named) {
-    $('nameBtn').hidden = false;
-    $('nameBtn').textContent = T.nameAdd;
-    // A native dialog, because a text box inside a rotated stage fights the phone's keyboard.
-    $('nameBtn').addEventListener('click', () => {
-      const typed = prompt(T.namePrompt, myName);
-      if (typed === null) return;
-      myName = cleanName(typed);
-      $('nameBtn').textContent = myName ? T.nameSet(myName) : T.nameAdd;
+  if (T.named && $('nameDialog').showModal) {
+    const dlg = $('nameDialog');
+    $('nameTitle').textContent = T.nameTitle;
+    $('nameLabel').textContent = T.nameLabel;
+    $('nameSend').textContent = T.share;
+    $('nameCancel').textContent = T.nameCancel;
+    $('share').addEventListener('click', e => {
+      e.preventDefault(); // the plain link stays underneath for browsers without dialogs
       refreshShare();
+      dlg.showModal();
     });
+    $('nameInput').addEventListener('input', () => { myName = cleanName($('nameInput').value); refreshShare(); });
+    $('nameForm').addEventListener('submit', e => { e.preventDefault(); $('nameSend').click(); });
+    $('nameSend').addEventListener('click', () => dlg.close());
+    $('nameCancel').addEventListener('click', () => dlg.close());
   }
 
   for (const k of KEYS) {
@@ -427,16 +431,27 @@ function start(T) {
     $('legend').append(li);
   }
 
-  const paintMute = () => {
-    $('mute').textContent = muted ? '🔇' : '🔊';
-    $('mute').setAttribute('aria-label', muted ? T.sound : T.mute);
+  /* ---------- music and sound switches ---------- */
+  function paintSwitch(btn, on, label) {
+    btn.classList.toggle('off', !on);
+    btn.setAttribute('aria-pressed', on);
+    btn.setAttribute('aria-label', label);
+  }
+  const paintSwitches = () => {
+    paintSwitch($('musicBtn'), musicOn, musicOn ? T.musicOff : T.musicOn);
+    paintSwitch($('soundBtn'), soundOn, soundOn ? T.soundOff : T.soundOn);
   };
-  $('mute').addEventListener('click', () => {
-    muted = !muted;
-    paintMute();
-    if (musicGain) musicGain.gain.setTargetAtTime(muted ? 0 : .6, ac.currentTime, .05);
+  $('musicBtn').addEventListener('click', () => {
+    musicOn = !musicOn;
+    if (musicOn) track.play().catch(() => {}); else track.pause();
+    paintSwitches();
   });
-  paintMute();
+  $('soundBtn').addEventListener('click', () => {
+    soundOn = !soundOn;
+    if (sfx) sfx.gain.value = soundOn ? 1 : 0;
+    paintSwitches();
+  });
+  paintSwitches();
 
   $('play').addEventListener('click', begin);
   refreshShare();

@@ -14,7 +14,7 @@ const C = { maroon: '#5c0f2e', plum: '#2c0b3f', rani: '#e0156f', marigold: '#ff9
 
 /* ---------- small marigold, leaf ---------- */
 function marigold(x, y, r) {
-  let s = '';
+  let s = `<circle cx="${x}" cy="${y}" r="${f1(r * 1.1)}" fill="#2a0a1e"/>`;
   for (const [k, col] of [[1, '#e86a00'], [.74, '#ff8f0f'], [.48, '#ffb52e'], [.24, '#ffd65c']]) {
     const n = Math.max(7, Math.round(11 * k + 3));
     for (let i = 0; i < n; i++) {
@@ -24,7 +24,7 @@ function marigold(x, y, r) {
   }
   return s;
 }
-const mangoLeaf = (x, y, len, tilt) => `<g transform="translate(${x} ${y}) rotate(${tilt})"><path d="M0 0C${len * .34} ${len * .28} ${len * .3} ${len * .78} 0 ${len}C${-len * .3} ${len * .78} ${-len * .34} ${len * .28} 0 0Z" fill="#2f8a3a"/><path d="M0 2V${len - 3}" stroke="#a8d66a" stroke-width="1.2"/></g>`;
+const mangoLeaf = (x, y, len, tilt) => `<g transform="translate(${x} ${y}) rotate(${tilt})"><path d="M0 0C${len * .34} ${len * .28} ${len * .3} ${len * .78} 0 ${len}C${-len * .3} ${len * .78} ${-len * .34} ${len * .28} 0 0Z" fill="#2f8a3a" stroke="#2a0a1e" stroke-width="1.6"/><path d="M0 2V${len - 3}" stroke="#a8d66a" stroke-width="1.2"/></g>`;
 
 /* ---------- toran: seamless horizontal tile ---------- */
 function toran() {
@@ -159,94 +159,142 @@ function dud() {
     <path d="M16 28C23 39 25 45 16 45C7 45 9 39 16 28ZM105 50C111 59 113 64 105 64C97 64 99 59 105 50Z" fill="#6fc4ff" stroke="${INK}" stroke-width="1.800"/>`);
 }
 
-/* ---------- palace scene, drawn for one half and mirrored: Indian formal symmetry ---------- */
+/* ---------- palace scenes, in the same sticker language as the crackers ---------- */
+const LINE = 4.5;
+const SHADES = { '#e0156f': '#a80f52', '#ff8a1f': '#d95f12', '#ff3d3d': '#c21a2c', '#0b7a75': '#075350', '#7d0a3c': '#5c0f2e' };
 const mult = (x, y, w, h) => { // cusped (multifoil) arch; (x,y) is the bottom-left corner
   const sy = y - h * .52, r = w * .3, top = y - h;
   const P = [[x, sy], [x + w * .09, sy - h * .17], [x + w * .27, sy - h * .32], [x + w * .5, top], [x + w * .73, sy - h * .32], [x + w * .91, sy - h * .17], [x + w, sy]];
-  return `M${x} ${y}L${P[0].join(' ')}` + P.slice(1).map(p => `A${f1(r)} ${f1(r)} 0 0 1 ${f1(p[0])} ${f1(p[1])}`).join('') + `L${x + w} ${y}Z`;
+  return `M${f1(x)} ${f1(y)}L${P[0].map(f1).join(' ')}` + P.slice(1).map(p => `A${f1(r)} ${f1(r)} 0 0 1 ${f1(p[0])} ${f1(p[1])}`).join('') + `L${f1(x + w)} ${f1(y)}Z`;
 };
-const dome = (cx, y, r, h, fill) => `<path d="M${cx - r * .8} ${y}C${cx - r * 1.32} ${y - h * .14} ${cx - r * 1.26} ${y - h * .56} ${cx - r * .36} ${y - h * .72}C${cx - r * .16} ${y - h * .78} ${cx - r * .05} ${y - h * .88} ${cx} ${y - h}C${cx + r * .05} ${y - h * .88} ${cx + r * .16} ${y - h * .78} ${cx + r * .36} ${y - h * .72}C${cx + r * 1.26} ${y - h * .56} ${cx + r * 1.32} ${y - h * .14} ${cx + r * .8} ${y}Z" fill="${fill}" stroke="${C.gold}" stroke-width="2"/>
-  <path d="M${cx - r * .95} ${y - h * .2}Q${cx} ${y - h * .08} ${cx + r * .95} ${y - h * .2}" fill="none" stroke="${C.gold}" stroke-width="1.6" opacity=".7"/>
-  <path d="M${cx} ${y - h}V${y - h - r * .42}" stroke="${C.gold}" stroke-width="3.5"/><circle cx="${cx}" cy="${y - h - r * .22}" r="${f1(r * .09 + 2)}" fill="${C.gold}"/><circle cx="${cx}" cy="${y - h - r * .45}" r="${f1(r * .06 + 1.5)}" fill="${C.gold}"/>`;
+const domePath = (cx, y, r, h) => `M${f1(cx - r * .8)} ${y}C${f1(cx - r * 1.32)} ${f1(y - h * .14)} ${f1(cx - r * 1.26)} ${f1(y - h * .56)} ${f1(cx - r * .36)} ${f1(y - h * .72)}C${f1(cx - r * .16)} ${f1(y - h * .78)} ${f1(cx - r * .05)} ${f1(y - h * .88)} ${cx} ${f1(y - h)}C${f1(cx + r * .05)} ${f1(y - h * .88)} ${f1(cx + r * .16)} ${f1(y - h * .78)} ${f1(cx + r * .36)} ${f1(y - h * .72)}C${f1(cx + r * 1.26)} ${f1(y - h * .56)} ${f1(cx + r * 1.32)} ${f1(y - h * .14)} ${f1(cx + r * .8)} ${y}Z`;
+function dome(cx, y, r, h, fill) {
+  const lw = r > 80 ? LINE : LINE * .7;
+  const shade = `M${cx + r * .2} ${f1(y - h * .78)}C${f1(cx + r * .3)} ${f1(y - h * .74)} ${f1(cx + r * .34)} ${f1(y - h * .73)} ${f1(cx + r * .36)} ${f1(y - h * .72)}C${f1(cx + r * 1.26)} ${f1(y - h * .56)} ${f1(cx + r * 1.32)} ${f1(y - h * .14)} ${f1(cx + r * .8)} ${y}H${f1(cx + r * .42)}C${f1(cx + r * .86)} ${f1(y - h * .2)} ${f1(cx + r * .8)} ${f1(y - h * .56)} ${cx + r * .2} ${f1(y - h * .78)}Z`;
+  const tip = y - h - r * .34;
+  return `<path d="M${cx} ${f1(y - h + 2)}V${f1(tip)}" stroke="${INK}" stroke-width="${f1(lw * 2.2)}"/><path d="M${cx} ${f1(y - h + 2)}V${f1(tip)}" stroke="#ffd65c" stroke-width="${f1(lw * .9)}"/>
+    <path d="${domePath(cx, y, r, h)}" fill="${fill}" stroke="${INK}" stroke-width="${lw}"/><path d="${shade}" fill="${SHADES[fill]}"/>
+    <path d="M${f1(cx - r * 1.04)} ${f1(y - h * .24)}Q${cx} ${f1(y - h * .1)} ${f1(cx + r * 1.04)} ${f1(y - h * .24)}" fill="none" stroke="#ffd65c" stroke-width="${f1(lw * 1.1)}"/>
+    <path d="${domePath(cx, y, r, h)}" fill="none" stroke="${INK}" stroke-width="${lw}"/>
+    ${star(cx, tip, r * .13 + 5, '#ffd65c', INK)}`;
+}
 const litArch = (x, y, w, h) => {
+  const lw = Math.max(2, Math.min(LINE, w * .05)), rh = Math.min(h * .2, w * .4);
   let rail = '';
-  const rh = Math.min(h * .2, w * .4);
-  for (let i = 0; i < 5; i++) rail += `<rect x="${f1(x + w * (i + .35) / 5)}" y="${f1(y - rh)}" width="${f1(w * .06)}" height="${f1(rh)}" fill="#6d2410"/>`;
-  return `<path d="${mult(x - 3.5, y, w + 7, h + 6)}" fill="#e8b23e"/><path d="${mult(x, y, w, h)}" fill="#ff9a1a"/><path d="${mult(x + w * .17, y, w * .66, h * .76)}" fill="#ffd65c"/>${rail}<rect x="${x}" y="${f1(y - rh)}" width="${w}" height="${f1(Math.max(1.4, h * .018))}" fill="#6d2410"/>`;
+  for (let i = 0; i < 5; i++) rail += `<rect x="${f1(x + w * (i + .35) / 5)}" y="${f1(y - rh)}" width="${f1(w * .06)}" height="${f1(rh)}" fill="${INK}"/>`;
+  return `<path d="${mult(x - w * .08, y, w * 1.16, h * 1.08)}" fill="#ffd65c" stroke="${INK}" stroke-width="${f1(lw)}"/><path d="${mult(x, y, w, h)}" fill="#ff8a1f" stroke="${INK}" stroke-width="${f1(lw * .7)}"/><path d="${mult(x + w * .17, y, w * .66, h * .76)}" fill="#fff0a8"/>${rail}<rect x="${f1(x)}" y="${f1(y - rh)}" width="${f1(w)}" height="${f1(Math.max(2.4, lw * .8))}" fill="${INK}"/>`;
 };
-const chhatri = (cx, y, s, wall) => `<rect x="${cx - 44 * s}" y="${y - 58 * s}" width="${88 * s}" height="${58 * s}" fill="${wall}"/>${litArch(cx - 34 * s, y, 26 * s, 48 * s)}${litArch(cx + 8 * s, y, 26 * s, 48 * s)}
-  <path d="M${cx - 56 * s} ${y - 58 * s}H${cx + 56 * s}L${cx + 42 * s} ${y - 72 * s}H${cx - 42 * s}Z" fill="${C.maroon}" stroke="${C.gold}" stroke-width="2"/>${dome(cx, y - 72 * s, 38 * s, 62 * s, '#a32a55')}`;
+const block = (x, y, w, h, fill) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fill}"/><rect x="${f1(x + w * .86)}" y="${y}" width="${f1(w * .14)}" height="${h}" fill="${SHADES[fill]}"/><rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="${INK}" stroke-width="${LINE}"/>`;
+const band = (x, y, w, h, fill = '#0b7a75') => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fill}" stroke="${INK}" stroke-width="${LINE * .8}"/>${zigzag(x + 4, y + h * .72, w - 8, h * .42, Math.round(w / 14), '#ffd65c', 2.4)}`;
+const roof = (x, y, w, h) => `<path d="M${x} ${y}H${x + w}L${x + w - h * .9} ${y - h}H${x + h * .9}Z" fill="#ffd65c" stroke="${INK}" stroke-width="${LINE}"/><path d="M${f1(x + w * .78)} ${y}H${x + w}L${x + w - h * .9} ${y - h}H${f1(x + w * .78)}Z" fill="#e8a020"/><path d="M${x} ${y}H${x + w}L${x + w - h * .9} ${y - h}H${x + h * .9}Z" fill="none" stroke="${INK}" stroke-width="${LINE}"/>`;
+const medal = (x, y, r) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${CUT}" stroke="${INK}" stroke-width="${LINE * .7}"/>${star(x, y, r * .78, '#e0156f')}`;
+const chhatri = (cx, y, s) => `${dome(cx, y - 72 * s, 38 * s, 62 * s, '#ff8a1f')}${block(cx - 44 * s, y - 58 * s, 88 * s, 58 * s, '#0b7a75')}${litArch(cx - 35 * s, y, 27 * s, 46 * s)}${litArch(cx + 8 * s, y, 27 * s, 46 * s)}${roof(cx - 58 * s, y - 58 * s, 116 * s, 14 * s)}`;
 const lights = (x1, y1, x2, y2, sag, n) => {
-  let s = `<path d="M${x1} ${y1}Q${(x1 + x2) / 2} ${(y1 + y2) / 2 + sag * 2} ${x2} ${y2}" fill="none" stroke="#1a0820" stroke-width="1.4"/>`;
+  let s = `<path d="M${x1} ${y1}Q${(x1 + x2) / 2} ${(y1 + y2) / 2 + sag * 2} ${x2} ${y2}" fill="none" stroke="${INK}" stroke-width="3"/>`;
   for (let i = 0; i <= n; i++) {
     const t = i / n, x = (1 - t) ** 2 * x1 + 2 * t * (1 - t) * (x1 + x2) / 2 + t * t * x2;
     const y = (1 - t) ** 2 * y1 + 2 * t * (1 - t) * ((y1 + y2) / 2 + sag * 2) + t * t * y2;
-    const col = ['#ffd65c', '#ff5fa2', '#7dffc7', '#ff9a1a'][i % 4];
-    s += `<circle cx="${f1(x)}" cy="${f1(y)}" r="9" fill="${col}" opacity=".22"/><circle cx="${f1(x)}" cy="${f1(y)}" r="3.2" fill="${col}"/>`;
+    s += `<circle cx="${f1(x)}" cy="${f1(y + 3)}" r="6.5" fill="${['#ffd65c', '#ff5fa2', '#7dffc7', '#ff8a1f'][i % 4]}" stroke="${INK}" stroke-width="2.4"/>`;
   }
   return s;
 };
-function half() { // left half, x 0..800
-  const wall = '#57163e', wall2 = '#431034';
+const burst = (x, y, s, cols) => {
+  const n = 22, ray = (a, r1, r2, c, sw) => `<path d="M${f1(x + Math.cos(a) * r1)} ${f1(y + Math.sin(a) * r1)}L${f1(x + Math.cos(a) * r2)} ${f1(y + Math.sin(a) * r2)}" stroke="${c}" stroke-width="${sw}"/>`;
+  let o = '';
+  for (let i = 0; i < n; i++) {
+    const a = i / n * 6.283, len = s * (i % 2 ? 1 : .74), c = cols[i % cols.length];
+    o += ray(a, s * .24, len, INK, 8.5) + ray(a, s * .24, len, c, 4.2);
+    o += `<circle cx="${f1(x + Math.cos(a) * (len + 7))}" cy="${f1(y + Math.sin(a) * (len + 7))}" r="4.5" fill="${c}" stroke="${INK}" stroke-width="2.2"/>`;
+  }
+  return o + star(x, y, s * .2, '#ffd65c', INK);
+};
+const skyBands = (W, H, tops) => {
+  const cols = ['#0a0a42', '#1a0d55', '#320f66', '#561268', '#8a1a5c', '#c93a3a'];
+  return cols.map((c, i) => `<rect y="${f1(tops[i] * H)}" width="${W}" height="${H}" fill="${c}"/>`).join('');
+};
+const skyDots = (W, H, n, m) => {
   let s = '';
-  // tall gate tower at the far left
-  s += `<rect x="60" y="300" width="216" height="360" fill="${wall}"/>`;
-  s += `<path d="M42 300H294L272 276H64Z" fill="${C.maroon}" stroke="${C.gold}" stroke-width="2.5"/>`;
-  s += dome(168, 276, 88, 148, '#b83a6b');
-  s += chhatri(70, 276, .68, wall2) + chhatri(266, 276, .68, wall2);
-  for (const x of [84, 146, 208]) s += litArch(x, 400, 44, 76);
-  for (const x of [84, 146, 208]) s += litArch(x, 520, 44, 92);
-  s += `<rect x="60" y="412" width="216" height="9" fill="${C.gold}"/><rect x="60" y="532" width="216" height="7" fill="${C.gold}"/>`;
+  for (let i = 0; i < n; i++) s += `<circle cx="${f1(rnd(0, W))}" cy="${f1(rnd(0, H))}" r="${f1(rnd(1.2, 2.6))}" fill="${CUT}"/>`;
+  for (let i = 0; i < m; i++) s += star(f1(rnd(20, W - 20)), f1(rnd(20, H)), f1(rnd(8, 13)), '#ffd65c', INK);
+  return s;
+};
+function diya(x, y, s, flames) {
+  const bowl = `M${x - 30 * s} ${y - 3 * s}Q${x} ${y + 3 * s} ${x + 30 * s} ${y - 3 * s}L${x + 38 * s} ${y - 9 * s}Q${x + 24 * s} ${y + 22 * s} ${x} ${y + 21 * s}Q${x - 26 * s} ${y + 21 * s} ${x - 30 * s} ${y - 3 * s}Z`;
+  return `<g stroke-linejoin="round"><path d="${bowl}" fill="${CUT}" stroke="${CUT}" stroke-width="${9 * s}"/><path d="${bowl}" fill="#d9642a" stroke="${INK}" stroke-width="${3 * s}"/>
+    <path d="M${x + 8 * s} ${y + 19 * s}Q${x + 26 * s} ${y + 16 * s} ${x + 35 * s} ${y - 7 * s}L${x + 27 * s} ${y - 1 * s}Q${x + 20 * s} ${y + 11 * s} ${x + 8 * s} ${y + 19 * s}Z" fill="#a8441a"/>
+    <path d="M${x - 19 * s} ${y + 8 * s}Q${x} ${y + 13 * s} ${x + 19 * s} ${y + 8 * s}" fill="none" stroke="#ffd65c" stroke-width="${2.2 * s}" stroke-dasharray="1 5" stroke-linecap="round"/>` +
+    (flames ? `<path d="M${x} ${y - 40 * s}C${x + 15 * s} ${y - 16 * s} ${x + 10 * s} ${y - 3 * s} ${x} ${y - 3 * s}C${x - 10 * s} ${y - 3 * s} ${x - 15 * s} ${y - 16 * s} ${x} ${y - 40 * s}Z" fill="#ffb52e" stroke="${INK}" stroke-width="${2.4 * s}"/><path d="M${x} ${y - 24 * s}C${x + 5 * s} ${y - 13 * s} ${x + 4 * s} ${y - 6 * s} ${x} ${y - 6 * s}C${x - 4 * s} ${y - 6 * s} ${x - 5 * s} ${y - 13 * s} ${x} ${y - 24 * s}Z" fill="#fff5c4"/>` : '') + '</g>';
+}
+function pot(x, y) {
+  const body = `M${x - 48} ${y}h96l-14 62h-68z`;
+  return `${mangoLeaf(x - 68, y - 32, 38, 40)}${mangoLeaf(x + 68, y - 32, 38, -40)}${marigold(x, y - 44, 30)}${marigold(x - 36, y - 16, 27)}${marigold(x + 36, y - 14, 26)}
+    <path d="${body}" fill="#d9642a" stroke="${INK}" stroke-width="${LINE}"/><path d="M${x + 16} ${y + 2}H${x + 47}L${x + 33} ${y + 60}H${x + 16}Z" fill="#a8441a"/>${zigzag(x - 38, y + 20, 76, 6, 10, '#ffd65c', 2.6)}<path d="${body}" fill="none" stroke="${INK}" stroke-width="${LINE}"/>`;
+}
+function floor(W, top, H) {
+  let s = `<rect y="${top}" width="${W}" height="${H - top}" fill="#3c0a24"/>`;
+  for (let i = -2; i * 90 < W + 90; i++) for (let j = 0; top + j * 45 < H; j++) {
+    const x = i * 90 + (j % 2) * 45 + 45, y = top + j * 45 + 26;
+    s += `<path d="M${x} ${y - 21}L${x + 43} ${y}L${x} ${y + 21}L${x - 43} ${y}Z" fill="#5c0f2e"/>`;
+  }
+  return s + `<rect y="${top}" width="${W}" height="${LINE * 1.2}" fill="${INK}"/>`;
+}
+
+const TALL_DIYAS = [100, 275, 450, 625, 800].map((x, i) => [x, 1680 + (i % 2) * 34]);
+function tallScene() {
+  const W = 900, H = 1800;
+  let s = skyBands(W, H, [0, .13, .24, .34, .43, .52]) + skyDots(W, 1000, 110, 14);
+  s += burst(190, 195, 150, ['#ff5fa2', '#ffd65c', CUT]) + burst(700, 165, 165, ['#7dffc7', CUT, '#39c9c2']) + burst(450, 110, 86, ['#ffd65c', '#ff8a1f', CUT]);
+  s += burst(118, 545, 92, ['#ff8a1f', '#ffd65c', '#ff5fa2']) + burst(792, 530, 100, ['#a6c8ff', CUT, '#ffd65c']);
+  // one cream edge around the whole palace, like the crackers' cut-out line
+  const outline = [`<path d="${domePath(450, 900, 196, 300)}"/>`, `<rect x="124" y="870" width="652" height="660"/>`];
+  for (const cx of [62, 838]) outline.push(`<path d="${domePath(cx, 936, 52, 96)}"/><rect x="${cx - 62}" y="936" width="124" height="600"/>`);
+  s += `<g fill="${CUT}" stroke="${CUT}" stroke-width="15">${outline.join('')}</g>`;
+  for (const cx of [62, 838]) {
+    s += dome(cx, 936, 52, 96, '#ff3d3d') + block(cx - 62, 960, 124, 560, '#0b7a75') + roof(cx - 76, 960, 152, 26);
+    for (const y of [1140, 1290, 1440]) s += litArch(cx - 34, y, 68, 112) + band(cx - 62, y + 2, 124, 18, '#7d0a3c');
+  }
+  s += dome(450, 900, 196, 300, '#e0156f');
+  s += block(124, 900, 652, 620, '#7d0a3c') + roof(102, 900, 696, 30);
+  s += chhatri(178, 870, 1.05) + chhatri(722, 870, 1.05);
+  s += band(124, 900, 652, 24);
+  for (const x of [168, 284, 400, 516, 632]) s += litArch(x, 1088, 100, 136);
+  s += band(124, 1088, 652, 24);
+  for (const x of [168, 284, 400, 516, 632]) s += litArch(x, 1284, 100, 150);
+  s += band(124, 1284, 652, 24);
+  for (const x of [142, 244, 576, 678]) s += litArch(x, 1510, 80, 176);
+  s += litArch(358, 1510, 184, 200);
+  for (const x of [270, 630]) s += medal(x, 1346, 15);
+  s += lights(450, 575, 62, 815, 30, 18) + lights(450, 575, 838, 815, 30, 18);
+  s += `<rect y="1510" width="${W}" height="44" fill="#0b7a75" stroke="${INK}" stroke-width="${LINE}"/>`;
+  for (let i = 0; i < 23; i++) s += `<path d="${mult(i * 40 + 6, 1551, 26, 30)}" fill="${INK}" stroke="#ffd65c" stroke-width="2"/>`;
+  s += floor(W, 1551, H) + pot(70, 1586) + pot(830, 1586);
+  for (const [x, y] of TALL_DIYAS) s += diya(x, y, 1.45, false);
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><g stroke-linejoin="round" stroke-linecap="round">${s}</g></svg>`;
+}
+
+const DIYAS = [150, 278, 406, 534, 662, 938, 1066, 1194, 1322, 1450].map((x, i) => [x, 750 + (i % 2) * 14, 1.05]);
+function halfWide() {
+  let s = `<g fill="${CUT}" stroke="${CUT}" stroke-width="15"><path d="${domePath(168, 276, 88, 148)}"/><rect x="60" y="276" width="216" height="384"/><rect x="276" y="462" width="524" height="200"/></g>`;
+  s += dome(168, 276, 88, 148, '#e0156f') + block(60, 300, 216, 360, '#7d0a3c') + roof(38, 300, 260, 24);
+  s += chhatri(70, 276, .68) + chhatri(266, 276, .68);
+  for (const y of [400, 520]) { for (const x of [84, 146, 208]) s += litArch(x, y, 44, 76); s += band(60, y, 216, 14); }
   s += litArch(112, 658, 112, 112);
-  // low arcade running to the centre
-  s += `<rect x="276" y="480" width="524" height="180" fill="${wall2}"/><rect x="276" y="480" width="524" height="10" fill="${C.gold}"/>`;
+  s += block(276, 480, 524, 180, '#7d0a3c') + band(276, 462, 524, 20);
   for (let i = 0; i < 8; i++) s += litArch(292 + i * 64, 650, 46, 118);
-  s += `<path d="M276 480H800V462H276Z" fill="${C.maroon}"/>`;
-  for (let i = 0; i < 26; i++) s += `<path d="${mult(280 + i * 20, 480, 14, 22)}" fill="#7a1d4e" stroke="${C.gold}" stroke-width=".8"/>`;
-  s += chhatri(470, 462, .9, wall) + chhatri(652, 462, .75, wall);
-  s += lights(168, 112, 470, 330, 26, 18) + lights(470, 330, 652, 362, 16, 12) + lights(652, 362, 800, 300, 16, 10);
+  s += chhatri(470, 462, .9) + chhatri(652, 462, .75);
+  s += lights(168, 112, 470, 330, 26, 16) + lights(470, 330, 652, 362, 16, 10) + lights(652, 362, 800, 300, 16, 8);
   return s;
 }
 function scene(flames) {
-  let stars = '';
-  for (let i = 0; i < 170; i++) { const x = rnd(0, 1600), y = rnd(0, 520), r = rnd(.5, 1.9); stars += `<circle cx="${f1(x)}" cy="${f1(y)}" r="${f1(r)}" fill="#fff" opacity="${f1(rnd(.25, .9))}"/>`; }
-  for (let i = 0; i < 16; i++) stars += star(rnd(20, 1580), rnd(10, 350), rnd(4, 8), C.paleGold);
-  const burst = (x, y, s, cols) => {
-    let o = '';
-    const n = 40;
-    for (let i = 0; i < n; i++) {
-      const a = i / n * 6.283, len = s * (i % 2 ? 1 : .72), c = cols[i % cols.length];
-      const ex = x + Math.cos(a) * len, ey = y + Math.sin(a) * len;
-      o += `<path d="M${f1(x + Math.cos(a) * len * .3)} ${f1(y + Math.sin(a) * len * .3)}L${f1(ex)} ${f1(ey)}" stroke="${c}" stroke-width="2.4" stroke-linecap="round"/><circle cx="${f1(ex)}" cy="${f1(ey)}" r="2.8" fill="${c}"/>`;
-    }
-    return o;
-  };
-  const clouds = [[230, 240, 190], [1330, 210, 210], [700, 300, 150], [1010, 150, 130]].map(([x, y, w]) => `<g fill="#ff5a7a" opacity=".14"><ellipse cx="${x}" cy="${y}" rx="${w}" ry="${w * .13}"/><ellipse cx="${x + w * .45}" cy="${y - 18}" rx="${w * .5}" ry="${w * .1}"/></g>`).join('');
-  const diya = (x, y, s) => `<ellipse cx="${x}" cy="${y + 15 * s}" rx="${33 * s}" ry="${5 * s}" fill="#000" opacity=".4"/><path d="M${x - 30 * s} ${y - 3 * s}Q${x} ${y + 3 * s} ${x + 30 * s} ${y - 3 * s}L${x + 36 * s} ${y - 8 * s}Q${x + 22 * s} ${y + 22 * s} ${x} ${y + 21 * s}Q${x - 26 * s} ${y + 21 * s} ${x - 30 * s} ${y - 3 * s}Z" fill="${C.clay}" stroke="#ffbe6a" stroke-width="1.3"/><path d="M${x - 19 * s} ${y + 8 * s}Q${x} ${y + 13 * s} ${x + 19 * s} ${y + 8 * s}" fill="none" stroke="#ffe08a" stroke-width="${1.6 * s}" stroke-dasharray="1 4" stroke-linecap="round"/>` +
-    (flames ? `<circle cx="${x}" cy="${y - 20 * s}" r="${38 * s}" fill="url(#glow)"/><path d="M${x} ${y - 38 * s}C${x + 14 * s} ${y - 16 * s} ${x + 9 * s} ${y - 3 * s} ${x} ${y - 3 * s}C${x - 9 * s} ${y - 3 * s} ${x - 14 * s} ${y - 16 * s} ${x} ${y - 38 * s}Z" fill="#ffc531"/><path d="M${x} ${y - 24 * s}C${x + 5 * s} ${y - 13 * s} ${x + 4 * s} ${y - 5 * s} ${x} ${y - 5 * s}C${x - 4 * s} ${y - 5 * s} ${x - 5 * s} ${y - 13 * s} ${x} ${y - 24 * s}Z" fill="#fff7cf"/>` : '');
-  const ground = DIYAS.map(([x, y, s]) => diya(x, y, s)).join('');
-  let jali = '';
-  for (let i = 0; i < 40; i++) jali += `<path d="${mult(i * 40 + 8, 696, 24, 30)}" fill="#1d0726" stroke="${C.gold}" stroke-width="1.4"/>`;
-  const pot = x => `<path d="M${x - 44} 696h88l-13 54h-62z" fill="${C.clay}" stroke="#ffbe6a" stroke-width="2"/>` + marigold(x - 34, 684, 25) + marigold(x + 35, 686, 24) + marigold(x, 662, 28) + marigold(x - 18, 638, 19) + marigold(x + 24, 636, 20) + mangoLeaf(x - 62, 672, 36, 40) + mangoLeaf(x + 62, 672, 36, -40);
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="800" viewBox="0 0 1600 800"><defs>
-    <linearGradient id="sky" x2="0" y2="1"><stop offset="0" stop-color="#090b3d"/><stop offset=".36" stop-color="#2a0f5e"/><stop offset=".62" stop-color="#7a1a68"/><stop offset=".82" stop-color="#d2422d"/></linearGradient>
-    <radialGradient id="lit" cy=".82" r=".95"><stop offset="0" stop-color="#ffe089"/><stop offset=".5" stop-color="#ffa426"/><stop offset="1" stop-color="#b8430f"/></radialGradient>
-    <linearGradient id="domeG" x1="0" x2="1"><stop offset="0" stop-color="#7d1b4a"/><stop offset=".42" stop-color="#d64a7c"/><stop offset="1" stop-color="#6d1640"/></linearGradient>
-    <linearGradient id="stone" x2="0" y2="1"><stop offset="0" stop-color="#8a2a55"/><stop offset="1" stop-color="#2b0b2a"/></linearGradient>
-    <radialGradient id="fw"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
-    <radialGradient id="glow"><stop offset="0" stop-color="#ffb52e" stop-opacity=".55"/><stop offset="1" stop-color="#ffb52e" stop-opacity="0"/></radialGradient>
-    <linearGradient id="floor" x2="0" y2="1"><stop offset="0" stop-color="#3a1030"/><stop offset="1" stop-color="#180620"/></linearGradient>
-  </defs>
-  <rect width="1600" height="800" fill="url(#sky)"/>${stars}
-  ${burst(420, 150, 112, ['#ff5fa2', '#ffd1e3', '#ffd65c'])}${burst(1205, 165, 124, ['#7dffc7', '#fff4d6', '#39c9c2'])}${burst(640, 95, 62, ['#ffd65c', '#fff4d6', '#ff8a1f'])}${burst(965, 80, 70, ['#ff8a1f', '#ffd65c', '#ff5fa2'])}
-  <g>${half()}<g transform="translate(1600 0) scale(-1 1)">${half()}</g>
-  <rect y="660" width="1600" height="40" fill="#6d1c4a"/><rect y="660" width="1600" height="6" fill="${C.gold}"/>
-  ${jali}<rect y="696" width="1600" height="104" fill="#2c0b2c"/><rect y="696" width="1600" height="4" fill="${C.gold}"/>
-  ${pot(52)}${pot(1548)}
-  ${ground}</g>
-  </svg>`;
+  let s = skyBands(1600, 800, [0, .16, .3, .43, .56, .68]) + skyDots(1600, 500, 110, 12);
+  s += burst(420, 150, 112, ['#ff5fa2', '#ffd65c', CUT]) + burst(1205, 165, 124, ['#7dffc7', CUT, '#39c9c2']) + burst(640, 95, 62, ['#ffd65c', '#ff8a1f', CUT]) + burst(965, 80, 70, ['#ff8a1f', '#ffd65c', '#ff5fa2']);
+  s += `${halfWide()}<g transform="translate(1600 0) scale(-1 1)">${halfWide()}</g>`;
+  s += `<rect y="660" width="1600" height="40" fill="#0b7a75" stroke="${INK}" stroke-width="${LINE}"/>`;
+  for (let i = 0; i < 40; i++) s += `<path d="${mult(i * 40 + 8, 697, 24, 28)}" fill="${INK}" stroke="#ffd65c" stroke-width="2"/>`;
+  s += floor(1600, 696, 800) + pot(52, 690) + pot(1548, 690);
+  s += DIYAS.map(([x, y, k]) => diya(x, y, k, flames)).join('');
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="800" viewBox="0 0 1600 800"><g stroke-linejoin="round" stroke-linecap="round">${s}</g></svg>`;
 }
-const DIYAS = [150, 278, 406, 534, 662, 938, 1066, 1194, 1322, 1450].map((x, i) => [x, 750 + (i % 2) * 14, 1.05]);
 
 const write = (f, s) => fs.writeFileSync(art(f), s);
 write('toran.svg', toran()); write('rangoli.svg', rangoli());
@@ -258,11 +306,11 @@ const shot = async (html, w, h, out, q) => {
   await p.setContent(html, { waitUntil: 'load' });
   await p.evaluate(() => document.fonts.ready);
   await p.waitForTimeout(300);
-  await p.screenshot({ path: out, type: 'jpeg', quality: q });
+  await p.screenshot(out.endsWith('.png') ? { path: out, type: 'png' } : { path: out, type: 'jpeg', quality: q });
   await p.close();
 };
 const page = (b, w, h) => `<!DOCTYPE html><meta charset="utf-8"><style>*{margin:0}body{width:${w}px;height:${h}px;overflow:hidden;background:#000}</style>${b}`;
-await shot(page(scene(false), 1600, 800), 1600, 800, art('scene.jpg'), 80);
+await shot(page(tallScene(), 900, 1800), 900, 1800, art('scene.jpg'), 86);
 
 const uri = f => `data:image/svg+xml;base64,${fs.readFileSync(art(f)).toString('base64')}`;
 const font = f => `data:font/woff2;base64,${fs.readFileSync(`${root}/fonts/${f}`).toString('base64')}`;
@@ -270,14 +318,16 @@ const preview = (title, tag, fam, file, cta) => `<style>
 @font-face{font-family:T;src:url(${font(fam)})}@font-face{font-family:U;src:url(${font('balooda-bengali.woff2')})}@font-face{font-family:U;src:url(${font('balooda-latin.woff2')})}
 .s{position:absolute;left:-150px;top:-120px;transform-origin:0 0;width:1600px;height:800px;transform:scale(.9375)}.s svg{display:block}
 .r{position:absolute;left:325px;top:40px;width:550px;height:550px;opacity:.95}
-.v{position:absolute;inset:0;background:radial-gradient(ellipse 500px 300px at 50% 47%,#17051fd9 35%,#17051f00 100%)}
+.v{position:absolute;inset:0;background:radial-gradient(ellipse 500px 300px at 50% 47%,#17051fc4 35%,#17051f00 100%)}
 .t{position:absolute;inset:0;text-align:center;color:#fff4d6;font-family:U;padding-top:165px}
 h1{font:400 118px/1.08 T;padding:.34em .12em .16em;margin:-.34em 0 -.16em;background:linear-gradient(#fff6c0,#ffd65c 45%,#ff9a1a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 0 #7a1414) drop-shadow(0 0 22px #ff7a1a)}
 p{font-size:32px;font-weight:600;margin-top:4px}
 b{display:inline-block;margin-top:14px;padding:6px 44px 4px;font-size:42px;font-weight:800;color:#4a0f0f;background:linear-gradient(#ffe08a,#ff9a1a);border:4px solid #fff4d6;outline:3px solid #b5531a;border-radius:50px}
 .o{position:absolute;left:0;right:0;top:0;height:92px;background:url(${uri('toran.svg')}) repeat-x;background-size:auto 100%}
-</style><div class=s>${scene(true)}</div><img class=r src="${uri('rangoli.svg')}"><div class=v></div><div class=o></div><div class=t><h1>${title}</h1>${tag ? `<p>${tag}</p>` : ''}<b>${cta}</b></div>`;
+</style><div class=s>${scene(true)}</div><img class=r src="${uri('rangoli.svg')}"><div class=v></div><div class=o></div><div class=t><h1>${title}</h1>${tag === ' ' ? '<p style="height:50px"></p>' : tag ? `<p>${tag}</p>` : ''}<b>${cta}</b></div>`;
 await shot(page(preview('Happy Diwali', 'Burst crackers. Beat your friends.', 'yatra-latin.woff2', 'en', 'Tap to Play'), 1200, 630), 1200, 630, `${root}/preview-en.jpg`, 84);
 await shot(page(preview('শুভ দীপাবলি', '', 'galada-bengali.woff2', 'bn', 'Tap to Play'), 1200, 630), 1200, 630, `${root}/preview-bn.jpg`, 84);
+// The server writes the sender's name into the gap under the title.
+await shot(page(preview('Happy Diwali', ' ', 'yatra-latin.woff2', 'en', 'Tap to Play'), 1200, 630).replace('<style>', '<style>html{zoom:.6667}'), 800, 420, `${root}/preview-base.png`);
 await b.close();
 console.log('art done', DIYAS.map(d => d.join(',')).join(' '));

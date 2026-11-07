@@ -1,14 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>
+// Old links from the GitHub Pages days move to the live site, keeping the sender's name.
+if (location.hostname.endsWith('github.io')) {
+  const n = new URLSearchParams(location.search).get('from');
+  location.replace('https://happy-diwali-jet.vercel.app/' + (location.pathname.endsWith('bn.html') ? 'bn.html' : n ? 'from/' + encodeURIComponent(n) : ''));
+}
+</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Happy Diwali! Tap to Play</title>
 <meta property="og:title" content="🪔 Happy Diwali! Tap to Play">
 <meta property="og:description" content="Burst crackers, dodge the phuss, beat your friends!">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://newrishav-debug.github.io/HappyDiwali/">
-<meta property="og:image" content="https://newrishav-debug.github.io/HappyDiwali/preview-en.jpg?v=3">
+<meta property="og:url" content="https://happy-diwali-jet.vercel.app/">
+<meta property="og:image" content="https://happy-diwali-jet.vercel.app/preview-en.jpg?v=5">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
@@ -25,7 +32,10 @@
     <div class="plaque" id="scoreBox"><small id="scoreLabel"></small><b id="score"></b></div>
     <div class="plaque" id="timeBox"><small id="timeLabel"></small><b id="time"></b></div>
   </div>
-  <button id="mute" type="button"></button>
+  <div id="switches">
+    <button id="musicBtn" type="button" aria-pressed="true"><span aria-hidden="true">🎵</span></button>
+    <button id="soundBtn" type="button" aria-pressed="true"><span aria-hidden="true">🔊</span></button>
+  </div>
   <main id="panel">
     <img id="rangoli" src="art/rangoli.svg" alt="">
     <h1 id="title"></h1>
@@ -37,17 +47,25 @@
       <button id="play" type="button"></button>
       <a id="share" target="_blank" rel="noopener"></a>
     </div>
-    <button id="nameBtn" type="button" hidden></button>
   </main>
+  <dialog id="nameDialog">
+    <form id="nameForm">
+      <h2 id="nameTitle"></h2>
+      <label><span id="nameLabel"></span><input id="nameInput" maxlength="30" autocomplete="given-name" enterkeyhint="send"></label>
+      <a id="nameSend" target="_blank" rel="noopener"></a>
+      <button id="nameCancel" type="button"></button>
+    </form>
+  </dialog>
 </div>
+<div id="turn" hidden><span aria-hidden="true">📱</span><p>Please hold your phone upright to play</p></div>
 <script>
 window.T = {
   locale: 'en-IN', named: true,
   title: 'Happy Diwali', from: n => `from ${n}`,
   tagline: 'Burst crackers, dodge the phuss, beat your friends!',
   play: 'Tap to Play', again: 'Play Again', score: 'Score', time: 'Time', over: 'You scored',
-  share: 'Send on WhatsApp', nameAdd: '✎ Add your name to the greeting', nameSet: n => `✎ From ${n}`, namePrompt: 'Your name, to add to the greeting',
-  sound: 'Turn sound on', mute: 'Turn sound off',
+  share: 'Send on WhatsApp', nameTitle: 'Who is this from?', nameLabel: 'Your name goes on the greeting', nameCancel: 'Not now',
+  musicOff: 'Turn music off', musicOn: 'Turn music on', soundOff: 'Turn sound off', soundOn: 'Turn sound on',
   invite: n => `🪔 Happy Diwali${n ? ` from ${n}` : ''}! Come burst some crackers with me 🎆`,
   brag: (s, n, r) => `🪔 Happy Diwali${n ? ` from ${n}` : ''}! I scored ${s} and I'm officially a ${r}. Beat that! 🎆`,
   names: { chakri: 'Chakri', anar: 'Anar', rocket: 'Rocket', bomb: 'Sutli Bomb', ladi: 'Ladi', dud: 'Phuss!' },
@@ -55,7 +73,6 @@ window.T = {
   ranks: [[0, 'Phuss Cracker'], [300, 'Chhota Patakha'], [600, 'Phuljhari Star'], [900, 'Rocket Raja'], [1200, 'Sutli Samrat']],
 };
 </script>
-<script src="music.js"></script>
 <script src="game.js"></script>
 </body>
 </html>
