@@ -37,7 +37,7 @@ import('./api/page.mjs').then(async ({ GET: page }) => {
   assert.ok(!html.includes('<script>'), 'a name cannot inject a script');
   assert.ok(html.includes('<base href="/">'), 'assets still load from a /from/name address');
   const ok = await (await page(new Request('https://s.co/api/page?from=Priya'))).text();
-  assert.ok(ok.includes('content="https://s.co/api/preview?v=2&from=Priya"'), 'preview image carries the name');
+  assert.ok(ok.includes('content="https://s.co/api/preview?v=3&from=Priya"'), 'preview image carries the name');
   assert.ok(ok.includes('from Priya'), 'preview title carries the name');
   console.log('ok');
 });

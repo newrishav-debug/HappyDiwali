@@ -324,16 +324,18 @@ function card() {
   for (const [i, x] of [100, 240, 380, 520, 680, 820, 960, 1100].entries()) s += diya(x, 562 + (i % 2) * 8, 1.1, true);
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="position:absolute;left:0;top:0"><g stroke-linejoin="round" stroke-linecap="round">${s}</g></svg>`;
 }
-const preview = (lines, fam, size, top, second = '') => `<style>
-@font-face{font-family:T;src:url(${font(fam)})}
+const preview = (lines, fam, size, top, second = '', nameGap = 0) => `<style>
+@font-face{font-family:T;src:url(${font(fam)})}@font-face{font-family:U;src:url(${font('balooda-latin.woff2')});font-weight:400 800}
+i{display:block}
+b{display:inline-block;margin-top:14px;padding:7px 40px 3px;font:800 34px/1.2 U;color:#4a0f0f;background:linear-gradient(#ffe08a,#ff9a1a);border:4px solid #fff4d6;border-radius:40px;box-shadow:0 0 0 3px #b5531a,0 0 22px #ff9a1a}
 .t{position:absolute;left:0;right:0;top:${top}px;text-align:center}
 h1{font:400 ${size}px/1.02 T;padding:.3em .12em .16em;margin:-.3em 0 -.16em;background:linear-gradient(#fff6c0,#ffd65c 46%,#ff9a1a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 5px 0 #7a1414) drop-shadow(0 0 26px #ff7a1aaa)}
 p{font:400 ${Math.round(size * .62)}px/1.2 T;color:#fff4d6;margin-top:10px;filter:drop-shadow(0 3px 0 #7a1414)}
 .o{position:absolute;left:0;right:0;top:0;height:92px;background:url(${uri('toran.svg')}) repeat-x;background-size:auto 100%}
-</style>${card()}<div class=o></div><div class=t><h1>${lines.join('<br>')}</h1>${second ? `<p>${second}</p>` : ''}</div>`;
-await shot(page(preview(['Happy', 'Diwali'], 'yatra-latin.woff2', 140, 128), 1200, 630), 1200, 630, `${root}/preview-en.jpg`, 88);
-await shot(page(preview(['শুভ দীপাবলি'], 'galada-bengali.woff2', 112, 170, 'তোর্ষা ও ঋজু'), 1200, 630), 1200, 630, `${root}/preview-bn.jpg`, 88);
+</style>${card()}<div class=o></div><div class=t><h1>${lines.join('<br>')}</h1>${second ? `<p>${second}</p>` : ''}${nameGap ? `<i style="height:${nameGap}px"></i>` : ''}<b>Tap to Play</b></div>`;
+await shot(page(preview(['Happy', 'Diwali'], 'yatra-latin.woff2', 132, 104), 1200, 630), 1200, 630, `${root}/preview-en.jpg`, 88);
+await shot(page(preview(['শুভ দীপাবলি'], 'galada-bengali.woff2', 108, 138, 'তোর্ষা ও ঋজু'), 1200, 630), 1200, 630, `${root}/preview-bn.jpg`, 88);
 // The server writes the sender's name into the gap under the title.
-await shot(page(preview(['Happy', 'Diwali'], 'yatra-latin.woff2', 132, 98), 1200, 630).replace('<style>', '<style>html{zoom:.6667}'), 800, 420, `${root}/preview-base.png`);
+await shot(page(preview(['Happy', 'Diwali'], 'yatra-latin.woff2', 120, 92, '', 66), 1200, 630).replace('<style>', '<style>html{zoom:.6667}'), 800, 420, `${root}/preview-base.png`);
 await b.close();
 console.log('art done', DIYAS.map(d => d.join(',')).join(' '));
