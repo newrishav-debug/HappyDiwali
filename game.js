@@ -140,41 +140,41 @@ function start(T) {
   /* ---------- crackers ---------- */
   const TYPES = {
     chakri: {
-      pts: 10, size: 82, r: 36, life: 2.6, weight: 28,
+      pts: 10, size: 90, r: 38, life: 2.6, weight: 28,
       place: () => ({ x: rnd(70 * S, W - 70 * S), y: rnd(H * .34, H * .8), vx: from([-1, 1]) * rnd(50, 110) * S }),
       spin: 10,
       emit(c) { const a = c.age * 10, q = 40 * S; spark(c.x + Math.cos(a) * q, c.y + Math.sin(a) * q, -Math.sin(a) * 170 * S, Math.cos(a) * 170 * S, .45, from(['#ffd65c', '#ff5fa2', '#fff']), 120 * S); },
       burst(c) { ring(c.x, c.y, 54, 210, ['#ff5fa2', '#ffd65c', '#7dffc7', '#fff']); bang(.22, 3200, .4); },
     },
     anar: {
-      pts: 15, size: 86, r: 38, life: 2.3, weight: 24,
+      pts: 15, size: 92, r: 38, life: 2.3, weight: 24,
       place: () => ({ x: rnd(70 * S, W - 70 * S), y: rnd(H * .5, H * .8) }),
-      emit(c) { spark(c.x + rnd(-3, 3) * S, c.y - 36 * S, rnd(-44, 44) * S, -rnd(120, 240) * S, .6, from(['#ffd65c', '#fff', '#ff9a1a']), 300 * S); },
+      emit(c) { spark(c.x + rnd(-3, 3) * S, c.y - 38 * S, rnd(-44, 44) * S, -rnd(120, 240) * S, .6, from(['#ffd65c', '#fff', '#ff9a1a']), 300 * S); },
       burst(c) { fountain(c.x, c.y - 30 * S, 86, 520, ['#ffd65c', '#ff9a1a', '#fff', '#ffe89e']); bang(.4, 1900, .46); },
     },
     rocket: {
-      pts: 25, size: 94, r: 38, life: 4, weight: 14,
+      pts: 25, size: 100, r: 38, life: 4, weight: 14,
       place: () => ({ x: rnd(100 * S, W - 100 * S), y: H + 50 * S, vx: rnd(-34, 34) * S, vy: -rnd(.4, .52) * H }),
-      emit(c) { spark(c.x + 5 * S, c.y + 48 * S, rnd(-24, 24) * S, rnd(70, 170) * S, .38, from(['#ffb13c', '#fff4d6', '#ff5a36']), 0); },
+      emit(c) { spark(c.x, c.y + 24 * S, rnd(-24, 24) * S, rnd(70, 170) * S, .38, from(['#ffb13c', '#fff4d6', '#ff5a36']), 0); },
       burst(c) { ring(c.x, c.y, 104, 320, ['#7dffc7', '#39c9c2', '#fff', '#ffd65c']); thump(900, 240, .22, .16); bang(.5, 2300, .55); },
     },
     bomb: {
-      pts: 40, size: 80, r: 36, life: 1.35, weight: 12,
+      pts: 40, size: 88, r: 38, life: 1.35, weight: 12,
       place: () => ({ x: rnd(70 * S, W - 70 * S), y: rnd(H * .3, H * .76) }),
-      emit(c) { spark(c.x + 7 * S, c.y - 38 * S, rnd(-70, 70) * S, rnd(-80, 20) * S, .3, from(['#fff', '#ffd65c']), 180 * S); },
+      emit(c) { spark(c.x + 11 * S, c.y - 33 * S, rnd(-70, 70) * S, rnd(-80, 20) * S, .3, from(['#fff', '#ffd65c']), 180 * S); },
       burst(c) {
         ring(c.x, c.y, 150, 430, ['#fff4d6', '#ffd65c', '#ff5a36', '#ff9a1a'], 1.1);
         shake = 12 * S; buzz(70); thump(120, 42, .55, .75); bang(.7, 1300, .85);
       },
     },
     ladi: {
-      pts: 30, size: 96, r: 42, life: 2.5, weight: 12,
+      pts: 30, size: 104, r: 44, life: 2.5, weight: 12,
       place: () => ({ x: rnd(70 * S, W - 70 * S), y: rnd(H * .34, H * .68), vy: 20 * S }),
       sway: true,
       burst(c) { for (let i = 0; i < 8; i++) later.push({ at: i * .075, x: c.x + rnd(-14, 14) * S, y: c.y + (38 - i * 11) * S }); },
     },
     dud: {
-      pts: -20, size: 78, r: 32, life: 2.5, weight: 14,
+      pts: -20, size: 86, r: 34, life: 2.5, weight: 14,
       place: () => ({ x: rnd(70 * S, W - 70 * S), y: rnd(H * .34, H * .8) }),
       burst(c) { for (let i = 0; i < 14; i++) spark(c.x, c.y, rnd(-50, 50) * S, rnd(-50, 5) * S, .7, from(['#9aa0ad', '#6fc4ff']), 300 * S, 3); buzz(30); bang(.3, 340, .45); },
     },
@@ -395,7 +395,8 @@ function start(T) {
 
   /* ---------- screen text ---------- */
   $('title').textContent = T.title;
-  $('tagline').textContent = T.tagline;
+  $('tagline').textContent = T.tagline || '';
+  $('tagline').hidden = !T.tagline;
   $('play').textContent = T.play;
   $('share').textContent = T.share;
   $('scoreLabel').textContent = T.score;

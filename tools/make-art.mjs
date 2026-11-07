@@ -58,69 +58,105 @@ function rangoli() {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="480" height="480" viewBox="-240 -240 480 480">${s}</svg>`;
 }
 
-/* ---------- crackers ---------- */
-const sprite = body => `<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 120 120">${body}</svg>`;
-const star = (x, y, r, col) => { let d = ''; for (let i = 0; i < 10; i++) { const a = i * .6283 - 1.571, q = i % 2 ? r * .42 : r; d += `${i ? 'L' : 'M'}${f1(x + Math.cos(a) * q)} ${f1(y + Math.sin(a) * q)}`; } return `<path d="${d}Z" fill="${col}"/>`; };
-const zigzag = (x, y, w, h, n, col) => { let d = `M${x} ${y}`; for (let i = 1; i <= n; i++) d += `L${f1(x + w * i / n)} ${y + (i % 2 ? -h : 0)}`; return `<path d="${d}" fill="none" stroke="${col}" stroke-width="1.8"/>`; };
+/* ---------- crackers: flat stickers with a cream cut-out edge, a dark line and one hard shadow ---------- */
+const INK = '#2a0a1e', CUT = '#fff4d6';
+const sprite = body => `<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 120 120"><g stroke-linejoin="round" stroke-linecap="round">${body}</g></svg>`;
+const cutEdge = shapes => `<g fill="${CUT}" stroke="${CUT}" stroke-width="9">${shapes}</g>`;
+const star = (x, y, r, col, line) => { let d = ''; for (let i = 0; i < 10; i++) { const a = i * .6283 - 1.571, q = i % 2 ? r * .45 : r; d += `${i ? 'L' : 'M'}${f1(x + Math.cos(a) * q)} ${f1(y + Math.sin(a) * q)}`; } return `<path d="${d}Z" fill="${col}"${line ? ` stroke="${line}" stroke-width="1.4"` : ''}/>`; };
+const lit = (x, y, r) => star(x, y, r, '#ff9a1a', INK) + star(x, y, r * .55, '#fff4a8');
+const zigzag = (x, y, w, h, n, col, sw = 1.8) => { let d = `M${x} ${y}`; for (let i = 1; i <= n; i++) d += `L${f1(x + w * i / n)} ${f1(y + (i % 2 ? -h : 0))}`; return `<path d="${d}" fill="none" stroke="${col}" stroke-width="${sw}"/>`; };
+const lotus = (x, y, r, col, core) => { let s = ''; for (const a of [-60, -30, 0, 30, 60]) s += `<path transform="translate(${x} ${y}) rotate(${a})" d="M0 0C${r * .4} ${-r * .35} ${r * .32} ${-r * .8} 0 ${-r}C${-r * .32} ${-r * .8} ${-r * .4} ${-r * .35} 0 0Z" fill="${col}" stroke="${INK}" stroke-width="1"/>`; return s + `<circle cx="${x}" cy="${y}" r="${r * .17}" fill="${core}"/>`; };
 
 function chakri() {
-  let spiral = 'M60 60', rim = '';
-  for (let a = 0; a < 31.4; a += .3) { const r = 7 + a * 1.32; spiral += `L${f1(60 + Math.cos(a) * r)} ${f1(60 + Math.sin(a) * r)}`; }
-  for (let i = 0; i < 28; i++) { const a = i / 28 * 6.283; rim += `<circle cx="${f1(60 + Math.cos(a) * 51)}" cy="${f1(60 + Math.sin(a) * 51)}" r="2" fill="${C.paleGold}"/>`; }
-  return sprite(`<circle cx="60" cy="60" r="55" fill="#0a5d58" stroke="${C.gold}" stroke-width="3"/>${rim}<circle cx="60" cy="60" r="47" fill="#c90f5d"/>
-  <path d="${spiral}" fill="none" stroke="#7d0a3c" stroke-width="7.5"/><path d="${spiral}" fill="none" stroke="#ff4f93" stroke-width="4.5"/><path d="${spiral}" fill="none" stroke="${C.paleGold}" stroke-width="1.3"/>
-  <circle cx="60" cy="60" r="10" fill="${C.gold}"/><circle cx="60" cy="60" r="4.5" fill="${C.maroon}"/>
-  <path d="M110 55l9-4-2 8z" fill="#3a1a0c"/>`);
+  let sectors = '', spiral = '';
+  const n = 16, p = (r, a) => `${f1(60 + Math.cos(a) * r)} ${f1(60 + Math.sin(a) * r)}`;
+  for (let i = 0; i < n; i++) {
+    const a = i / n * 6.283, b = (i + 1) / n * 6.283;
+    sectors += `<path d="M${p(37, a)}L${p(50, a)}A50 50 0 0 1 ${p(50, b)}L${p(37, b)}A37 37 0 0 0 ${p(37, a)}Z" fill="${i % 2 ? '#ffc531' : '#e0156f'}"/>`;
+  }
+  for (let a = 0; a <= 19; a += .25) { const r = 12 + a * 1.27; spiral += `${a ? 'L' : 'M'}${p(r, a)}`; }
+  return sprite(`${cutEdge('<circle cx="60" cy="60" r="51"/><path d="M104 52L118 46L113 62Z"/>')}
+    <path d="M104 52L118 46L113 62Z" fill="#7a4a1e" stroke="${INK}" stroke-width="2"/>
+    <circle cx="60" cy="60" r="51" fill="${INK}"/>${sectors}
+    <circle cx="60" cy="60" r="50.5" fill="none" stroke="${INK}" stroke-width="2.4"/>
+    <circle cx="60" cy="60" r="37" fill="#0b7a75" stroke="${INK}" stroke-width="2.4"/>
+    <path d="${spiral}" fill="none" stroke="${INK}" stroke-width="6.5"/><path d="${spiral}" fill="none" stroke="#ffb52e" stroke-width="3.6"/>
+    <circle cx="60" cy="60" r="11.5" fill="#ffe08a" stroke="${INK}" stroke-width="2.4"/>${star(60, 60, 8, '#c90f5d')}`);
 }
 function anar() {
-  return sprite(`<defs><linearGradient id="a" x1="0" x2="1"><stop offset="0" stop-color="#7b2a12"/><stop offset=".42" stop-color="#e2692a"/><stop offset="1" stop-color="#8c3314"/></linearGradient></defs>
-  <path d="M60 17q6-8 2-14" fill="none" stroke="#3a1a0c" stroke-width="3" stroke-linecap="round"/>
-  <path d="M46 18h28l23 86H23z" fill="url(#a)"/><rect x="43" y="13" width="34" height="8" rx="3" fill="${C.gold}"/>
-  <path d="M35 49h50l9 38H26z" fill="${C.maroon}" stroke="${C.gold}" stroke-width="2.2"/>
-  ${marigold(60, 68, 11)}
-  ${zigzag(33, 57, 54, 3.5, 12, C.paleGold)}${zigzag(29, 83, 62, 3.5, 12, C.paleGold)}
-  <rect x="17" y="102" width="86" height="11" rx="3.5" fill="#5e1f0c"/><rect x="17" y="102" width="86" height="3" rx="1.5" fill="${C.gold}"/>`);
+  const body = 'M45 22H75L99 100H21Z';
+  return sprite(`${cutEdge(`<path d="${body}"/><rect x="39" y="13" width="42" height="11" rx="3"/><rect x="13" y="98" width="94" height="15" rx="4"/><path d="M60 12V5"/>`)}
+    <path d="M60 13V5" stroke="${INK}" stroke-width="3.4"/>
+    <path d="${body}" fill="#ff8a1f" stroke="${INK}" stroke-width="2.6"/>
+    <path d="M64 23H75L99 99H82Z" fill="#d95f12"/>
+    <path d="M34 53H86L95 87H25Z" fill="#7d0a3c" stroke="${INK}" stroke-width="2.2"/>
+    ${zigzag(36, 60, 48, 3.6, 12, '#ffd65c')}${zigzag(29, 83, 62, 3.6, 14, '#ffd65c')}
+    ${lotus(60, 78, 15, '#ff6fa8', '#ffd65c')}
+    <path d="M40 33H80" stroke="#fff4d6" stroke-width="3" stroke-dasharray="1 6"/>
+    <rect x="39" y="13" width="42" height="11" rx="3" fill="#ffd65c" stroke="${INK}" stroke-width="2.4"/>
+    <rect x="13" y="98" width="94" height="15" rx="4" fill="#0b7a75" stroke="${INK}" stroke-width="2.6"/>
+    <path d="M22 105.500H98" stroke="#ffd65c" stroke-width="2.4" stroke-dasharray="5 5"/>`);
 }
 function rocket() {
-  return sprite(`<rect x="66" y="42" width="5" height="76" rx="2" fill="#c89a5a"/><rect x="66" y="42" width="1.6" height="76" fill="#8a6235"/>
-  <path d="M60 3C74 14 79 24 79 34H41C41 24 46 14 60 3Z" fill="${C.rani}" stroke="${C.gold}" stroke-width="2"/>
-  <rect x="41" y="33" width="38" height="49" fill="#0a5d58"/><rect x="41" y="33" width="38" height="49" fill="none" stroke="${C.gold}" stroke-width="2"/>
-  <rect x="41" y="38" width="38" height="5" fill="${C.marigold}"/><rect x="41" y="72" width="38" height="5" fill="${C.marigold}"/>
-  ${star(60, 57, 11, C.paleGold)}<circle cx="60" cy="57" r="3" fill="${C.rani}"/>
-  <path d="M41 82l-5 12h10l3-12zM79 82l5 12H74l-3-12z" fill="#7d0a3c"/>
-  <path d="M60 18l2.5 5-2.5 5-2.5-5z" fill="${C.paleGold}"/>`);
+  const nose = 'M60 3C73 13 80 25 80 37H40C40 25 47 13 60 3Z', tube = 'M41 37H79V86H41Z', fins = 'M41 66L27 92L41 86ZM79 66L93 92L79 86Z';
+  return sprite(`${cutEdge(`<path d="${nose}"/><path d="${tube}"/><path d="${fins}"/><rect x="56.500" y="84" width="7" height="33" rx="2"/>`)}
+    <rect x="56.500" y="84" width="7" height="33" rx="2" fill="#d6a561" stroke="${INK}" stroke-width="2.2"/>
+    <path d="${fins}" fill="#e0156f" stroke="${INK}" stroke-width="2.4"/>
+    <path d="${tube}" fill="#0b7a75" stroke="${INK}" stroke-width="2.6"/><path d="M68 38H78V85H68Z" fill="#075350"/>
+    <path d="M42 45H78" stroke="#ffc531" stroke-width="5"/><path d="M42 78H78" stroke="#ffc531" stroke-width="5"/>
+    <circle cx="60" cy="61.500" r="11.500" fill="#fff4d6" stroke="${INK}" stroke-width="2"/>${star(60, 61.5, 9, '#e0156f')}
+    <path d="${nose}" fill="#ff3d3d" stroke="${INK}" stroke-width="2.6"/><path d="M63 7C73 15 79 26 79 36H67C68 26 67 15 63 7Z" fill="#c21a2c"/>
+    <path d="M60 16L63 22L60 28L57 22Z" fill="#ffd65c"/>`);
 }
 function bomb() {
   let twine = '';
   for (let i = -5; i <= 5; i++) {
-    twine += `<path d="M${60 + i * 7.5} 22Q${60 + i * 11.5} 66 ${60 + i * 7.5} 110" fill="none" stroke="#7a5228" stroke-width="2.1"/>`;
-    twine += `<path d="M18 ${66 + i * 7.5}Q60 ${66 + i * 11.5} 102 ${66 + i * 7.5}" fill="none" stroke="#a8804a" stroke-width="2.1"/>`;
+    const y = 69 + i * 8.2, w = Math.sqrt(Math.max(0, 44 ** 2 - (i * 8.2) ** 2));
+    twine += `<path d="M${f1(60 - w)} ${f1(y)}Q60 ${f1(y + 7)} ${f1(60 + w)} ${f1(y)}" fill="none" stroke="#8a5c2a" stroke-width="2.6"/>`;
   }
-  return sprite(`<defs><radialGradient id="b" cx=".36" cy=".3" r=".8"><stop offset="0" stop-color="#ecc98b"/><stop offset=".6" stop-color="#b98b4f"/><stop offset="1" stop-color="#6a4520"/></radialGradient><clipPath id="c"><circle cx="60" cy="66" r="44"/></clipPath></defs>
-  <path d="M60 23Q58 10 69 4" fill="none" stroke="#3a1a0c" stroke-width="3.6" stroke-linecap="round"/>
-  <circle cx="60" cy="66" r="44" fill="url(#b)"/><g clip-path="url(#c)">${twine}</g>
-  <rect x="35" y="50" width="50" height="32" rx="2.5" fill="#c81e2d" stroke="${C.gold}" stroke-width="2.2"/>
-  ${star(60, 66, 12, C.paleGold)}`);
+  for (const r of [-38, 38]) twine += `<path d="M${60 + r} 34Q${60 + r * .55} 69 ${60 + r} 104" fill="none" stroke="#6d4520" stroke-width="2.6"/>`;
+  twine += '<path d="M60 25V113" stroke="#6d4520" stroke-width="2.6"/>';
+  return sprite(`${cutEdge('<circle cx="60" cy="69" r="44"/><path d="M60 26C58 14 66 9 75 11" fill="none"/>')}
+    <circle cx="60" cy="69" r="44" fill="#d9ab66"/>
+    <path d="M92 39A44 44 0 0 1 30 101A50 50 0 0 0 92 39Z" fill="#a97a3f"/>
+    <clipPath id="ball"><circle cx="60" cy="69" r="44"/></clipPath><g clip-path="url(#ball)">${twine}</g>
+    <circle cx="60" cy="69" r="44" fill="none" stroke="${INK}" stroke-width="2.8"/>
+    <circle cx="60" cy="69" r="19" fill="#c81e2d" stroke="${INK}" stroke-width="2.4"/><circle cx="60" cy="69" r="14.500" fill="none" stroke="#ffd65c" stroke-width="1.600"/>${star(60, 69, 10, '#ffd65c')}
+    <rect x="53" y="20" width="14" height="8" rx="2" fill="#7d0a3c" stroke="${INK}" stroke-width="2"/>
+    <path d="M60 20C58 12 66 8 75 11" fill="none" stroke="${INK}" stroke-width="5"/><path d="M60 20C58 12 66 8 75 11" fill="none" stroke="#e8d3a2" stroke-width="2.400"/>
+    ${lit(77, 11, 10)}`);
 }
 function ladi() {
-  let s = '<path d="M60 22V116" stroke="#f2e2b4" stroke-width="3"/>';
-  for (let i = 0; i < 8; i++) {
-    const y = 31 + i * 10.6;
+  const rows = 6, one = (y, side, col) => {
+    const x = side > 0 ? 3 : -33;
+    return `<g transform="translate(60 ${y}) rotate(${side * 22})"><rect x="${x}" y="-5" width="30" height="10" rx="2" fill="${col}" stroke="${INK}" stroke-width="1.8"/><rect x="${side > 0 ? 25 : -33}" y="-5" width="8" height="10" rx="1.500" fill="#ffd65c" stroke="${INK}" stroke-width="1.800"/></g>`;
+  };
+  let edge = '', art = '';
+  for (let i = 0; i < rows; i++) {
+    const y = 37 + i * 11.5;
     for (const side of [-1, 1]) {
-      const col = (i + (side > 0 ? 1 : 0)) % 2 ? '#e3182d' : '#ff3d3d';
-      s += `<g transform="translate(60 ${y}) rotate(${side * 24})"><rect x="${side > 0 ? 0 : -33}" y="-4.2" width="33" height="8.6" rx="1.6" fill="${col}"/><rect x="${side > 0 ? 25 : -33}" y="-4.2" width="8" height="8.6" fill="${C.paleGold}"/></g>`;
+      edge += `<g transform="translate(60 ${y}) rotate(${side * 22})"><rect x="${side > 0 ? 3 : -33}" y="-5" width="30" height="10"/></g>`;
+      art += one(y, side, (i + (side > 0 ? 1 : 0)) % 2 ? '#e3182d' : '#ff5148');
     }
   }
-  return sprite(`${s}<rect x="42" y="5" width="36" height="24" rx="3" fill="#0a7f4b" stroke="${C.gold}" stroke-width="2"/>${star(60, 17, 8, C.paleGold)}`);
+  return sprite(`${cutEdge(`${edge}<rect x="40" y="6" width="40" height="24" rx="4"/>`)}
+    <path d="M60 28V113" stroke="#f2e2b4" stroke-width="3.400"/>${art}
+    <rect x="40" y="6" width="40" height="24" rx="4" fill="#0a7f4b" stroke="${INK}" stroke-width="2.600"/><path d="M41 12H79M41 24H79" stroke="#ffd65c" stroke-width="2"/>${star(60, 18, 7, '#ffd65c')}`);
 }
 function dud() {
-  return sprite(`<path d="M58 28C60 8 86 6 92 28" fill="none" stroke="#50535c" stroke-width="4.5" stroke-linecap="round"/>
-  <g transform="rotate(-9 60 70)"><rect x="33" y="28" width="52" height="84" rx="6" fill="#7e838f"/><rect x="33" y="28" width="16" height="84" rx="6" fill="#969ba7"/>
-  <rect x="33" y="50" width="52" height="33" fill="#676b76"/>
-  <circle cx="50" cy="63" r="3.3" fill="#23252b"/><circle cx="68" cy="63" r="3.3" fill="#23252b"/>
-  <path d="M51 76Q59 69 67 76" fill="none" stroke="#23252b" stroke-width="2.7" stroke-linecap="round"/>
-  <path d="M68 68c3 4 3 7 0 7s-3-3 0-7z" fill="#79c9ff"/></g>
-  <path d="M15 40c7 10 9 15 0 15s-7-5 0-15zM104 62c6 8 8 13 0 13s-6-5 0-13zM17 86c5 7 6 11 0 11s-5-4 0-11z" fill="#6fc4ff"/>`);
+  const body = '<rect x="35" y="26" width="50" height="74" rx="7"/>';
+  return sprite(`<ellipse cx="60" cy="108" rx="44" ry="8" fill="#6fc4ff" stroke="${INK}" stroke-width="2.200"/>
+    <path d="M36 108H58" stroke="#d6efff" stroke-width="2.400"/>
+    <g transform="rotate(-8 60 66)">${cutEdge(body)}
+    <path d="M60 26C60 8 84 6 90 26" fill="none" stroke="${INK}" stroke-width="6"/><path d="M60 26C60 8 84 6 90 26" fill="none" stroke="#8a8f9c" stroke-width="2.800"/>
+    <rect x="35" y="26" width="50" height="74" rx="7" fill="#8d92a0" stroke="${INK}" stroke-width="2.600"/>
+    <path d="M70 27H78Q84 27 84 33V93Q84 99 78 99H70Z" fill="#6c717e"/>
+    <rect x="35.500" y="48" width="49" height="30" fill="#b5b9c4" stroke="${INK}" stroke-width="2"/>
+    <circle cx="51" cy="60" r="3.600" fill="${INK}"/><circle cx="69" cy="60" r="3.600" fill="${INK}"/>
+    <path d="M45 53L55 55M75 53L65 55" stroke="${INK}" stroke-width="2"/>
+    <path d="M52 72Q60 65 68 72" fill="none" stroke="${INK}" stroke-width="2.600"/>
+    <path d="M71 62C75 68 75 72 71 72C67 72 67 68 71 62Z" fill="#6fc4ff" stroke="${INK}" stroke-width="1.200"/></g>
+    <path d="M16 28C23 39 25 45 16 45C7 45 9 39 16 28ZM105 50C111 59 113 64 105 64C97 64 99 59 105 50Z" fill="#6fc4ff" stroke="${INK}" stroke-width="1.800"/>`);
 }
 
 /* ---------- palace scene, drawn for one half and mirrored: Indian formal symmetry ---------- */
@@ -240,8 +276,8 @@ h1{font:400 118px/1.08 T;padding:.34em .12em .16em;margin:-.34em 0 -.16em;backgr
 p{font-size:32px;font-weight:600;margin-top:4px}
 b{display:inline-block;margin-top:14px;padding:6px 44px 4px;font-size:42px;font-weight:800;color:#4a0f0f;background:linear-gradient(#ffe08a,#ff9a1a);border:4px solid #fff4d6;outline:3px solid #b5531a;border-radius:50px}
 .o{position:absolute;left:0;right:0;top:0;height:92px;background:url(${uri('toran.svg')}) repeat-x;background-size:auto 100%}
-</style><div class=s>${scene(true)}</div><img class=r src="${uri('rangoli.svg')}"><div class=v></div><div class=o></div><div class=t><h1>${title}</h1><p>${tag}</p><b>${cta}</b></div>`;
+</style><div class=s>${scene(true)}</div><img class=r src="${uri('rangoli.svg')}"><div class=v></div><div class=o></div><div class=t><h1>${title}</h1>${tag ? `<p>${tag}</p>` : ''}<b>${cta}</b></div>`;
 await shot(page(preview('Happy Diwali', 'Burst crackers. Beat your friends.', 'yatra-latin.woff2', 'en', 'Tap to Play'), 1200, 630), 1200, 630, `${root}/preview-en.jpg`, 84);
-await shot(page(preview('শুভ দীপাবলি', 'বাজি ফাটাও, বন্ধুদের হারাও!', 'galada-bengali.woff2', 'bn', 'Tap to Play'), 1200, 630), 1200, 630, `${root}/preview-bn.jpg`, 84);
+await shot(page(preview('শুভ দীপাবলি', '', 'galada-bengali.woff2', 'bn', 'Tap to Play'), 1200, 630), 1200, 630, `${root}/preview-bn.jpg`, 84);
 await b.close();
 console.log('art done', DIYAS.map(d => d.join(',')).join(' '));
